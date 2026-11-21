@@ -1,0 +1,834 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Waapo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+<!--TELEGRAM_SDK--><script src="https://telegram.org/js/telegram-web-app.js"></script><!--/TELEGRAM_SDK-->
+<!--CONFIG--><script src="config.js"></script><!--/CONFIG-->
+<style>
+:root{--paper:#F3F5F9;--panel:#FFFFFF;--ink:#101A33;--muted:#58647F;--line:#DCE1EE;--accent:#3552F6;--accent-ink:#FFFFFF;--mango:#E39A00;--jade:#0B8F66;--rose:#C9354A;--r:14px;
+--head:"Familjen Grotesk",system-ui,-apple-system,"Segoe UI",sans-serif;--body:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:light}
+:root[data-theme=dark]{--paper:#0C1220;--panel:#141C30;--ink:#E9EDF9;--muted:#9BA7C6;--line:#25314F;--accent:#7088FF;--accent-ink:#0C1220;--mango:#F2B233;--jade:#2FC594;--rose:#FF6B7E;color-scheme:dark}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.45 var(--body);padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+main{max-width:520px;margin:0 auto;padding:18px 20px 8px}
+h1,h2{font-family:var(--head);margin:0;letter-spacing:-.01em}
+h2{font-size:15px;font-weight:600;color:var(--muted);margin:30px 0 6px;letter-spacing:0}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:6px}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font:700 21px var(--head)}
+.pill{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}.dot.on{background:var(--jade)}.dot.off{background:var(--rose)}
+.banner{margin:16px 0 0;padding:12px 14px;border-radius:var(--r);background:var(--panel);border-left:4px solid var(--mango);font-size:14px}
+.next{margin-top:22px}
+.next .when{font:600 15px var(--head);color:var(--muted)}
+.next .clock{font:700 56px/1 var(--head);letter-spacing:-.03em;margin:6px 0 8px}
+.next .clock small{font-size:22px;font-weight:600;letter-spacing:0;margin-left:4px;color:var(--muted)}
+.next q{display:block;font-size:17px;quotes:"“" "”";overflow-wrap:anywhere}
+.rail{position:relative;height:56px;margin:26px 2px 0}
+.rail .line{position:absolute;left:0;right:0;top:20px;height:2px;background:var(--line)}
+.rail .tick{position:absolute;top:14px;width:2px;height:14px;background:var(--line)}
+.rail .lab{position:absolute;top:34px;font-size:12px;color:var(--muted);transform:translateX(-50%);white-space:nowrap}
+.rail .mark{position:absolute;top:13px;width:14px;height:14px;margin-left:-7px;background:var(--mango);transform:rotate(45deg);border-radius:3px}
+.rail .mark.first{background:var(--accent)}
+.sub{font-size:13px;color:var(--muted);margin-top:2px}
+.rows{margin:0;padding:0;list-style:none}
+.rows li{display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:13px 0;border-bottom:1px solid var(--line)}
+.rows li:last-child{border-bottom:0}
+.rows b{font:600 20px var(--head)}
+.rows span{color:var(--muted)}
+.bar{height:5px;border-radius:5px;background:var(--line);margin-top:8px;overflow:hidden}.bar i{display:block;height:100%;background:var(--accent);border-radius:5px;transition:width .4s}
+.rows li.stack{display:block}.rows li.stack .l{display:flex;justify-content:space-between;align-items:baseline}
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 22px;border-radius:12px;background:var(--accent);color:var(--accent-ink);font-weight:600;width:100%}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.quiet{background:none;color:var(--accent);width:auto;min-height:40px;padding:0 4px}
+.link{color:var(--accent);font-weight:600}.link.danger{color:var(--rose)}
+/* status preview: the one memorable element */
+.preview{position:relative;display:grid;place-items:center;text-align:center;aspect-ratio:4/5;max-height:340px;width:100%;margin:18px 0 12px;border-radius:24px;padding:28px;overflow:hidden;font-family:var(--head);font-weight:600;line-height:1.2;overflow-wrap:anywhere;transition:background .25s,color .25s}
+.preview::after{content:"Status preview";position:absolute;left:16px;bottom:12px;font:500 12px var(--body);opacity:.7}
+.swatches{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:none}.swatches::-webkit-scrollbar{display:none}
+.sw{flex:0 0 34px;height:34px;border-radius:50%;border:2px solid var(--paper);box-shadow:0 0 0 1px var(--line)}
+.sw[aria-checked=true]{box-shadow:0 0 0 3px var(--ink)}
+textarea,input[type=datetime-local]{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+textarea{min-height:96px;resize:vertical}
+.meta{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin:6px 2px 14px}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:12px}
+.seg button{min-height:44px;font-weight:600;color:var(--muted)}.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.item{padding:14px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}
+.item .t{font:600 17px var(--head)}
+.item .x{margin:3px 0 8px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.item .row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:2px 9px}
+.empty{padding:26px 0;color:var(--muted)}
+.empty b{display:block;color:var(--ink);font:600 18px var(--head);margin-bottom:4px}
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+nav div{max-width:520px;margin:0 auto;display:flex}
+nav button{flex:1;display:grid;justify-items:center;gap:3px;padding:10px 0 9px;font-size:12px;color:var(--muted);position:relative}
+nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+nav button[aria-current=page]{color:var(--accent)}
+nav button[aria-current=page]::before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+#toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translate(-50%,12px);max-width:86%;background:var(--ink);color:var(--paper);padding:11px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:9}
+#toast.show{opacity:1;transform:translate(-50%,0)}#toast.err{background:var(--rose);color:#fff}
+.full{min-height:70vh;display:grid;place-content:center;text-align:center;gap:10px;padding:0 24px}.full h1{font-size:26px}
+.sk{height:18px;border-radius:6px;background:var(--line);margin:14px 0;opacity:.6}
+/* new screens */
+.back{color:var(--accent);font-weight:600;min-height:40px;padding:0 2px;margin-left:-2px}
+.lab{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:18px 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--panel);font-weight:500}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.menu-row{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:16px 0;border-bottom:1px solid var(--line)}
+.menu-row:last-child{border-bottom:0}.menu-row b{display:block;font:600 18px var(--head)}.menu-row span{color:var(--muted);font-size:14px}
+.menu-row svg{width:18px;height:18px;fill:none;stroke:var(--muted);stroke-width:2;flex:0 0 auto}
+.pick{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 0;border-bottom:1px solid var(--line)}
+.pick i{font-style:normal;width:22px;height:22px;border-radius:7px;border:2px solid var(--line);display:grid;place-items:center;font-size:14px;flex:0 0 auto}
+.pick[aria-pressed=true] i{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.pick small{display:block;color:var(--muted)}
+input[type=text],input[type=email],input[type=search]{width:100%;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.scrim{position:fixed;inset:0;background:rgba(8,12,24,.55);display:flex;align-items:flex-end;justify-content:center;z-index:20}
+.sheet{width:100%;max-width:520px;background:var(--paper);border-radius:22px 22px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+.sheet h3{font:700 20px var(--head);margin:0 0 4px}
+.sheet .two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.btn.ghost{background:none;color:var(--ink);border:1px solid var(--line)}
+.hours{display:flex;align-items:flex-end;gap:3px;height:96px;margin:10px 0 6px}
+.hours i{flex:1;background:var(--line);border-radius:3px 3px 0 0;min-height:3px}.hours i.top{background:var(--accent)}
+.hl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.big{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0}.big div b{display:block;font:700 26px var(--head)}.big div span{font-size:13px;color:var(--muted)}
+.pre{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;font-size:15px}
+.price{font:700 20px var(--head)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.rows li .menu-row{padding:0;border:0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main id="main"><div class="sk" style="width:40%"></div><div class="sk"></div><div class="sk" style="width:70%"></div></main>
+<nav id="nav" hidden><div id="tabs"></div></nav>
+<div id="sheetroot"></div>
+<div id="toast" role="status"></div>
+<script>
+(() => {
+const tg = window.Telegram && window.Telegram.WebApp;
+const DEMO = window.WAAPO_DEMO === true || new URLSearchParams(location.search).has('demo');
+const API = String(window.WAAPO_API || '').replace(/\/$/, '');
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const COLORS = ['#128C7E', '#1E88E5', '#3949AB', '#8E24AA', '#D81B60', '#E53935', '#FB8C00', '#FDD835', '#43A047', '#263238'];
+const newNm = () => ({ text: '', kind: 'list', numbers: '', list: '', grouplist: '', channels: [], groups: {}, q: '', when: 'now', at: '' });
+const S = { me: null, posts: [], msgs: [], jobs: [], lists: null, plans: null, insights: null, channels: [], gres: [], tab: 'home', view: { messages: 'list', more: 'menu' }, color: COLORS[0], when: 'now', nm: newNm(), sheet: null, payWait: null, listOpen: null, listDetail: null, newList: null, lg: { sel: {}, q: '', res: [] }, ptype: 'text', media: null, gtab: 'groups', lk: null, ld: null, lpage: 1, lq: '', lopen: null, linfo: null, au: null, aq: '', aid: null, aud: null, ap: null, apOpen: null, ct: null, cv: null, cp: null, cpd: null, ci: null, rc: null, cpid: null, q: [], qgap: 6, qat: '', cols: [], tpls: [], hist: [], tplOpen: null };
+const ICONS = { home: '<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/>', posts: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/>', messages: '<path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>', sending: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>', more: '<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>' };
+const LABEL = { home: 'Home', posts: 'Posts', messages: 'Messages', sending: 'Sending', more: 'More' };
+const CHEV = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+
+/* ---------- theme ---------- */
+function theme() {
+  const dark = tg && tg.colorScheme ? tg.colorScheme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+  try { tg && tg.setHeaderColor && tg.setHeaderColor(dark ? '#0C1220' : '#F3F5F9'); tg && tg.setBackgroundColor && tg.setBackgroundColor(dark ? '#0C1220' : '#F3F5F9'); } catch (e) {}
+}
+if (tg) { tg.ready(); tg.expand(); tg.onEvent && tg.onEvent('themeChanged', theme); }
+theme();
+
+/* ---------- time + helpers ---------- */
+const sod = d => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+const clock = ts => new Date(ts).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+function dayLabel(ts) { const d = new Date(ts), diff = Math.round((sod(d) - sod(new Date())) / 864e5); if (diff === 0) return d.getHours() >= 18 ? 'Tonight' : 'Today'; if (diff === 1) return 'Tomorrow'; return d.toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' }); }
+function until(ts) { const m = Math.max(0, Math.round((ts - Date.now()) / 60000)); if (m < 1) return 'any moment now'; if (m < 60) return `in ${m} min`; const h = Math.floor(m / 60); return h < 24 ? `in ${h} h ${m % 60} min` : `in ${Math.floor(h / 24)} d ${h % 24} h`; }
+const ink = hex => { const n = parseInt(hex.slice(1), 16), l = (0.299 * (n >> 16) + 0.587 * ((n >> 8) & 255) + 0.114 * (n & 255)) / 255; return l > 0.62 ? '#14110A' : '#FFFFFF'; };
+const fmtN = n => Number(n || 0).toLocaleString();
+const p2 = x => String(x).padStart(2, '0');
+const toLocalInput = ms => { const d = new Date(ms); return `${d.getFullYear()}-${p2(d.getMonth() + 1)}-${p2(d.getDate())}T${p2(d.getHours())}:${p2(d.getMinutes())}`; };
+const defaultWhen = () => { const d = new Date(Date.now() + 36e5); d.setMinutes(0, 0, 0); return toLocalInput(d.getTime()); };
+const hour12 = h => `${h % 12 || 12}${h < 12 ? ' AM' : ' PM'}`;
+const parseNums = s => {                                  // "+234 801 111 1111" is one number; two numbers on one line are split
+  const good = [], take = x => { const d = x.replace(/\D/g, ''); if (d.length >= 7 && d.length <= 15) { good.push(d); return true; } return false; };
+  for (const tok of String(s || '').split(/[\n,;]+/).map(x => x.trim()).filter(Boolean)) { if (take(tok)) continue; const parts = tok.split(/\s+/); if (parts.length > 1) parts.forEach(take); }
+  return [...new Set(good)];
+};
+
+/* ---------- api (real or demo) ---------- */
+async function api(method, path, body) {
+  if (DEMO) return demo(method, path, body);
+  let r;
+  try { r = await fetch(API + path, { method, headers: { Authorization: 'tma ' + (tg ? tg.initData : ''), 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); }
+  catch (e) { throw new Error('Cannot reach the server. Check your connection.'); }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || 'Something went wrong. Try again.');
+  return j;
+}
+function toast(msg, bad) { const t = $('#toast'); t.textContent = msg; t.className = 'show' + (bad ? ' err' : ''); clearTimeout(toast.t); toast.t = setTimeout(() => { t.className = ''; }, 3400); }
+const buzz = k => { try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(k || 'success'); } catch (e) {} };
+const confirmAsk = msg => new Promise(res => { if (tg && tg.showConfirm) tg.showConfirm(msg, res); else res(confirm(msg)); });
+const openLink = url => { if (DEMO) return toast('Demo: the payment page would open here.'); if (tg && tg.openLink) tg.openLink(url); else window.open(url, '_blank'); };
+
+/* ---------- loading ---------- */
+const need = k => !S.me || S.me.features[k] !== false;
+async function loadMe() { S.me = await api('GET', '/api/me'); }
+async function loadPosts() { if (need('schedule')) S.posts = (await api('GET', '/api/posts')).posts; }
+async function loadMsgs() { if (need('messages')) S.msgs = (await api('GET', '/api/messages')).messages; }
+async function loadJobs() { if (need('sending')) S.jobs = (await api('GET', '/api/jobs')).jobs; }
+async function loadLists() { if (need('lists') || need('glists') || need('messages')) { try { S.lists = await api('GET', '/api/lists'); } catch (e) { S.lists = S.lists || { numbers: [], groups: [] }; } } }
+async function loadChannels() { if (need('messages')) { try { S.channels = (await api('GET', '/api/channels')).channels; } catch (e) { S.channels = []; } } }
+async function loadListDetail() { const o = S.listOpen; S.listDetail = await api('GET', `/api/list?kind=${o.kind}&name=${encodeURIComponent(o.name)}`); }
+async function loadCols() { if (need('col')) { try { S.cols = (await api('GET', '/api/colours')).colors; } catch (x) { S.cols = []; } } }
+async function loadTpls() { S.tpls = (await api('GET', '/api/templates')).templates; }
+async function loadHist() { S.hist = (await api('GET', '/api/history')).posts; }
+async function loadContacts() { S.ct = await api('GET', '/api/contacts'); }
+async function loadViews() { S.cv = await api('GET', '/api/contacts/views'); }
+async function loadCPosts() { S.cp = (await api('GET', '/api/contacts/posts')).posts; S.cpd = S.cpid ? await api('GET', '/api/contacts/posts/' + S.cpid) : null; }
+async function loadInactive() { S.ci = await api('GET', '/api/contacts/inactive'); }
+async function loadReach() { S.rc = await api('GET', '/api/reach'); }
+async function loadAdmin() { const f = S.me.features; S.au = f.au ? await api('GET', '/api/admin/users') : { total: 0, users: [] }; S.ap = f.ap ? (await api('GET', '/api/admin/payments')).pending : []; }
+async function loadAUser() { S.aud = await api('GET', '/api/admin/users/' + S.aid); }
+async function loadLinks() {
+  if (S.gtab === 'chat') S.lk = await api('GET', `/api/links/chat?page=${S.lpage}&q=${encodeURIComponent(S.lq)}`);
+  else if (S.gtab === 'dead') S.ld = await api('GET', '/api/links/dead');
+}
+async function loadInbox() { S.inbox = await api('GET', '/api/inbox'); }
+async function loadRef() { S.ref = await api('GET', '/api/referral'); }
+async function loadAllGroups() { S.allg = await api('GET', '/api/groups/all'); }
+async function loadExcl() { S.excl = (await api('GET', '/api/exclusions')).numbers; }
+async function loadAccount() { S.acct = await api('GET', '/api/account'); }
+async function loadPlans() { if (need('plan')) S.plans = await api('GET', '/api/plans'); }
+async function loadInsights() { if (need('insights')) S.insights = await api('GET', '/api/insights'); }
+const loaders = {
+  home: () => Promise.all([loadMe(), loadPosts(), loadJobs()]), posts: async () => { await Promise.all([loadMe(), loadPosts()]); await loadCols(); },
+  messages: async () => { await loadMsgs(); if (S.view.messages === 'new') await Promise.all([loadLists(), loadChannels()]); },
+  sending: loadJobs,
+  more: async () => { const v = S.view.more; if (v === 'plan') await Promise.all([loadMe(), loadPlans()]); else if (v === 'insights') await loadInsights(); else if (v === 'lists') await loadLists(); else if (v === 'list') await loadListDetail(); else if (v === 'account') await Promise.all([loadMe(), loadAccount()]); else if (v === 'admin' || v === 'ausers' || v === 'apay') await loadAdmin(); else if (v === 'auser') await loadAUser(); else if (v === 'contacts') await loadContacts(); else if (v === 'cviews') await loadViews(); else if (v === 'cpost') await loadCPosts(); else if (v === 'cinact') await loadInactive(); else if (v === 'reach') await loadReach(); else if (v === 'tpl') await loadTpls(); else if (v === 'cols') await loadCols(); else if (v === 'hist') await loadHist(); else if (v === 'inbox') await loadInbox(); else if (v === 'ref') await loadRef(); else if (v === 'groups') { await loadAllGroups(); await loadLinks(); } else if (v === 'excl') await loadExcl(); else await loadMe(); }
+};
+
+/* ---------- screens ---------- */
+function tabs() {
+  const f = S.me.features, show = { home: true, posts: f.post || f.schedule, messages: f.messages, sending: f.sending, more: f.plan || f.insights || f.lists || f.glists };
+  $('#tabs').innerHTML = Object.keys(LABEL).filter(k => show[k]).map(k => `<button data-tab="${k}" ${S.tab === k ? 'aria-current="page"' : ''}><svg viewBox="0 0 24 24" aria-hidden="true">${ICONS[k]}</svg>${LABEL[k]}</button>`).join('');
+  $('#nav').hidden = false;
+}
+function homeHTML() {
+  const m = S.me, up = m.wa.up, next = S.posts[0], now = Date.now(), win = S.posts.filter(p => p.at <= now + 864e5);
+  const hours = [0, 6, 12, 18, 24].map(h => ({ h, ts: now + h * 36e5 }));
+  const rail = `<div class="rail" aria-hidden="true"><div class="line"></div>${hours.map((x, i) => `<div class="tick" style="left:${x.h / 24 * 100}%"></div><div class="lab" style="left:${x.h / 24 * 100}%${i === 0 ? ';transform:none' : i === 4 ? ';transform:translateX(-100%)' : ''}">${i === 0 ? 'Now' : clock(x.ts)}</div>`).join('')}${win.map((p, i) => `<div class="mark ${i === 0 ? 'first' : ''}" style="left:${Math.max(0, (p.at - now) / 864e5 * 100)}%"></div>`).join('')}</div>`;
+  const nextHTML = next ? `<div class="next"><div class="when">${dayLabel(next.at)} · ${until(next.at)}</div><div class="clock">${clock(next.at).replace(/\s?(AM|PM)/i, '<small>$1</small>')}</div><q>${esc(next.text || next.type)}</q></div>${rail}<div class="sub">${win.length ? `${win.length} post${win.length === 1 ? '' : 's'} in the next 24 hours` : 'Nothing in the next 24 hours'}</div>`
+    : `<div class="empty"><b>Nothing scheduled</b>Write a status and pick a time.<div style="margin-top:14px"><button class="btn" data-tab="posts">Write a status</button></div></div>`;
+  const pct = (a, b) => Math.min(100, Math.round(100 * (a || 0) / Math.max(1, b || 1)));
+  const planLine = m.plan.expires ? (m.plan.expired ? 'Ended' : `${m.plan.daysLeft} day${m.plan.daysLeft === 1 ? '' : 's'} left`) : 'No end date';
+  return `<div class="top"><div class="brand">Waapo</div><div class="pill"><span class="dot ${!m.wa.linked ? '' : up ? 'on' : 'off'}"></span>${!m.wa.linked ? 'Not linked' : up ? 'Connected' + (m.wa.number ? ' · +' + esc(m.wa.number) : '') : 'Reconnecting'}</div></div>
+${!m.wa.linked ? '<div class="banner">WhatsApp is not linked yet. Open the bot and tap <b>Link WhatsApp</b>.</div>' : ''}${m.plan.paused ? '<div class="banner">Your account is paused. Contact the admin.</div>' : ''}${m.plan.expired && !m.plan.paused ? '<div class="banner">Your plan has ended. Open <b>More</b>, then <b>Plan and payment</b>, to renew.</div>' : ''}
+${nextHTML}
+<h2>Today</h2><ul class="rows">
+<li class="stack"><div class="l"><span>Posts today</span><b>${m.usage.today} of ${m.usage.limit}</b></div><div class="bar"><i style="width:${pct(m.usage.today, m.usage.limit)}%"></i></div></li>
+<li><span>Plan${m.plan.name ? ' · ' + esc(m.plan.name) : ''}</span><b>${planLine}</b></li>
+<li><span>Contacts</span><b>${fmtN(m.counts.contacts)}</b></li><li><span>Groups</span><b>${fmtN(m.counts.groups)}</b></li><li><span>Lists</span><b>${fmtN(m.counts.lists)}</b></li></ul>`;
+}
+const ACC = { image: 'image/jpeg,image/png', video: 'video/mp4', audio: 'audio/mpeg,audio/ogg,.mp3,.ogg' };
+function postsHTML() {
+  const f = S.me.features, later = S.when === 'later', t = f.media ? S.ptype : 'text', med = t !== 'text', cols = [...new Set([...COLORS, ...S.cols.map(c => c.hex)])];
+  const types = f.media ? `<div class="seg" role="group" aria-label="Post type" style="grid-template-columns:repeat(4,1fr)">${[['text', 'Text'], ['image', 'Photo'], ['video', 'Video'], ['audio', 'Audio']].map(([k, l]) => `<button data-ptype="${k}" aria-pressed="${t === k}">${l}</button>`).join('')}</div>` : '';
+  const body = med ? `<label class="lab" for="mfile">Choose a ${{ image: 'photo (JPG or PNG)', video: 'video (MP4, up to 16 MB)', audio: 'voice note or song (MP3 or OGG)' }[t]}</label><input type="file" id="mfile" accept="${ACC[t]}"><div id="mprev" style="margin:12px 0"></div>${t !== 'audio' ? '<textarea id="cap" maxlength="700" placeholder="Add a caption (optional)" aria-label="Caption"></textarea>' : ''}`
+    : `<div class="preview" id="pv"></div>
+<div class="swatches" role="radiogroup" aria-label="Background colour">${cols.map(c => `<button class="sw" role="radio" aria-checked="${c === S.color}" aria-label="${c}" data-color="${c}" style="background:${c}"></button>`).join('')}</div>
+<textarea id="txt" maxlength="700" placeholder="Write your status" aria-label="Status text"></textarea>
+<div class="meta"><span id="cnt">0 of 700</span><span>Goes to your whole audience</span></div>`;
+  const composer = f.post ? `<div class="top"><h1 style="font-size:24px">${med ? 'Share a ' + { image: 'photo', video: 'video', audio: 'voice note' }[t] : 'Write a status'}</h1></div>${types}${body}
+<div class="seg" role="group" aria-label="When"><button data-when="now" aria-pressed="${!later}">Now</button><button data-when="later" aria-pressed="${later}">Later</button></div>
+${later ? '<input type="datetime-local" id="at" aria-label="Date and time" style="margin-bottom:12px">' : ''}
+${f.tpl ? '<input type="text" id="tname" maxlength="30" placeholder="Save as a template (optional name)" aria-label="Template name" style="margin-bottom:12px">' : ''}
+<button class="btn" id="${med ? 'mgo' : 'go'}" disabled>${later ? 'Schedule post' : 'Post now'}</button>` : '';
+  return `${composer}<h2>Scheduled</h2><div id="plist"></div>`;
+}
+function plistHTML() {
+  if (!S.posts.length) return '<div class="empty"><b>Nothing scheduled</b>Posts you schedule appear here.</div>';
+  return S.posts.map(p => `<div class="item"><div class="t">${dayLabel(p.at)}, ${clock(p.at)}</div><div class="x">${p.type !== 'text' ? `<b>${{ image: 'Photo', video: 'Video', audio: 'Audio' }[p.type] || esc(p.type)}</b> ` : ''}${esc(p.text)}</div><div class="row">${p.repeat && p.repeat !== 'none' ? `<span class="tag">Repeats ${esc(p.repeat)}</span>` : '<span></span>'}<span><button class="link" data-edit-post="${esc(p.id)}">Edit</button> &nbsp; <button class="link danger" data-cancel-post="${esc(p.id)}">Cancel</button></span></div></div>`).join('');
+}
+function targetText(t) { if (!t) return ''; const n = t.count; return { numbers: `${n} number${n === 1 ? '' : 's'}`, list: `list “${esc(t.name)}”`, groups: `${n} group${n === 1 ? '' : 's'}`, grouplist: `group list “${esc(t.name)}”`, channels: `${n} channel${n === 1 ? '' : 's'}` }[t.kind] || ''; }
+function msgsHTML() {
+  if (S.view.messages === 'new') return newMsgHTML();
+  const list = S.msgs.length ? S.msgs.map(m => `<div class="item"><div class="t">${dayLabel(m.at)}, ${clock(m.at)}</div><div class="x">${esc(m.text || m.type)}</div><div class="row"><span class="tag">To ${targetText(m.target)}${m.repeat && m.repeat !== 'none' ? ' · repeats ' + esc(m.repeat) : ''}</span><span><button class="link" data-edit-msg="${esc(m.id)}">Edit</button> &nbsp; <button class="link danger" data-cancel-msg="${esc(m.id)}">Cancel</button></span></div></div>`).join('')
+    : '<div class="empty"><b>No scheduled messages</b>Write one and pick who gets it.</div>';
+  return `<div class="top"><h1 style="font-size:24px">Messages</h1></div><div style="margin:16px 0 4px"><button class="btn" data-newmsg>New message</button></div><h2>Scheduled</h2>${list}`;
+}
+function newMsgHTML() {
+  const n = S.nm, later = n.when === 'later', kinds = [['list', 'My list'], ['grouplist', 'Group list'], ['groups', 'Groups'], ['numbers', 'Numbers'], ['channels', 'Channel']];
+  return `<div class="top"><button class="back" data-back="messages">‹ Messages</button></div><h1 style="font-size:24px;margin-top:6px">New message</h1>
+<label class="lab" for="mtxt">Message</label><textarea id="mtxt" maxlength="2000" placeholder="Write your message" style="min-height:120px"></textarea>
+<div class="meta"><span id="mcnt">0 of 2000</span><span>{name} becomes each person’s first name</span></div>
+<span class="lab">Send to</span><div class="chips" id="kinds">${kinds.map(([k, l]) => `<button class="chip" data-kind="${k}" aria-pressed="${n.kind === k}">${l}</button>`).join('')}</div>
+<div id="target"></div><div class="sub" id="sum" style="margin:12px 0"></div>
+<div class="seg" role="group" aria-label="When"><button data-mwhen="now" aria-pressed="${!later}">Now</button><button data-mwhen="later" aria-pressed="${later}">Later</button></div>
+${later ? '<input type="datetime-local" id="mat" aria-label="Date and time" style="margin-bottom:12px">' : ''}
+<button class="btn" id="msend" disabled>${later ? 'Schedule message' : 'Send now'}</button>`;
+}
+function chipsHTML(items, sel, attr, multi) { return items.length ? `<div class="chips">${items.map(x => `<button class="chip" ${attr}="${esc(x.id ?? x.name)}" aria-pressed="${multi ? sel.includes(x.id) : sel === x.name}">${esc(x.name)}${x.count !== undefined ? ' · ' + fmtN(x.count) : ''}</button>`).join('')}</div>` : ''; }
+function targetHTML() {
+  const n = S.nm, L = S.lists || { numbers: [], groups: [] };
+  if (n.kind === 'list') return L.numbers.length ? chipsHTML(L.numbers, n.list, 'data-list') : '<div class="empty">No lists yet. Create one in the bot under Audience, then Lists.</div>';
+  if (n.kind === 'grouplist') return L.groups.length ? chipsHTML(L.groups, n.grouplist, 'data-glist') : '<div class="empty">No group lists yet. Create one in the bot under Messages, then Group lists.</div>';
+  if (n.kind === 'channels') return S.channels.length ? chipsHTML(S.channels, n.channels, 'data-chan', true) : '<div class="empty">No channels saved. Add one in the bot under Messages, then My channels.</div>';
+  if (n.kind === 'numbers') return '<textarea id="nums" placeholder="One number per line, with country code, like 2348012345678" style="min-height:110px"></textarea>';
+  return `<input type="search" id="gq" placeholder="Search your groups" aria-label="Search groups"><div id="gsel" class="sub" style="margin:10px 0 0"></div><div id="gres"></div>`;
+}
+function gresHTML() {
+  if (!S.gres.length) return '<div class="empty">No group matches.</div>';
+  return S.gres.map(g => `<button class="pick" data-gtoggle="${esc(g.id)}" aria-pressed="${!!S.nm.groups[g.id]}"><span>${esc(g.name)}<small>${fmtN(g.size)} members${g.admin ? ' · you admin' : ''}</small></span><i>${S.nm.groups[g.id] ? '✓' : ''}</i></button>`).join('');
+}
+function nmTarget() {
+  const n = S.nm;
+  if (n.kind === 'list') return n.list ? { kind: 'list', name: n.list } : null;
+  if (n.kind === 'grouplist') return n.grouplist ? { kind: 'grouplist', name: n.grouplist } : null;
+  if (n.kind === 'groups') { const ids = Object.keys(n.groups); return ids.length ? { kind: 'groups', ids } : null; }
+  if (n.kind === 'numbers') { const nums = parseNums(n.numbers); return nums.length ? { kind: 'numbers', numbers: nums } : null; }
+  return n.channels.length ? { kind: 'channels', ids: n.channels } : null;
+}
+function nmCount() {
+  const n = S.nm, L = S.lists || { numbers: [], groups: [] };
+  if (n.kind === 'list') return (L.numbers.find(x => x.name === n.list) || {}).count || 0;
+  if (n.kind === 'grouplist') return (L.groups.find(x => x.name === n.grouplist) || {}).count || 0;
+  if (n.kind === 'groups') return Object.keys(n.groups).length; if (n.kind === 'numbers') return parseNums(n.numbers).length; return n.channels.length;
+}
+function nmUpdate() {
+  const n = S.nm, t = nmTarget(), c = nmCount(), noun = { list: 'people', grouplist: 'groups', groups: 'groups', numbers: 'numbers', channels: 'channels' }[n.kind];
+  if ($('#sum')) $('#sum').textContent = t ? `Goes to ${fmtN(c)} ${noun}` : 'Choose who should get it.';
+  if ($('#mcnt')) $('#mcnt').textContent = `${n.text.length} of 2000`;
+  if ($('#msend')) $('#msend').disabled = !(n.text.trim() && t && (n.when === 'now' || n.at));
+  if ($('#gsel')) $('#gsel').textContent = Object.keys(n.groups).length ? `${Object.keys(n.groups).length} selected: ${Object.values(n.groups).slice(0, 3).join(', ')}${Object.keys(n.groups).length > 3 ? '…' : ''}` : '';
+}
+let gTimer = 0;
+async function searchGroups(q) { try { S.gres = (await api('GET', '/api/groups?q=' + encodeURIComponent(q || ''))).groups; } catch (e) { S.gres = []; toast(e.message, true); } if ($('#gres')) $('#gres').innerHTML = gresHTML(); }
+function renderTarget() { $('#target').innerHTML = targetHTML(); if (S.nm.kind === 'numbers') $('#nums').value = S.nm.numbers; if (S.nm.kind === 'groups') { $('#gq').value = S.nm.q; searchGroups(S.nm.q); } nmUpdate(); }
+function jobsHTML() {
+  const list = S.jobs.length ? S.jobs.map(j => { const left = Math.max(0, j.total - j.sent), p = j.total ? Math.round(100 * j.sent / j.total) : 0; return `<div class="item"><div class="t">${esc(j.preview || j.type)}</div><div class="sub">${j.type === 'message' ? 'Message' : 'Status'} · started ${clock(j.started)}</div><div class="bar" role="progressbar" aria-valuenow="${p}" aria-valuemin="0" aria-valuemax="100"><i style="width:${p}%"></i></div><div class="row" style="margin-top:10px"><span>${fmtN(j.sent)} sent · ${fmtN(left)} left</span>${j.stopping ? '<span class="tag">Stopping</span>' : `<button class="link danger" data-stop="${esc(j.id)}">Stop</button>`}</div></div>`; }).join('')
+    : '<div class="empty"><b>Nothing is sending</b>When you post or send a message, you can follow it here and stop it.</div>';
+  return `<div class="top"><h1 style="font-size:24px">Sending now</h1></div>${list}`;
+}
+function moreHTML() {
+  const v = S.view.more, f = S.me.features;
+  if (v === 'admin') return adminHTML(); if (v === 'ausers') return ausersHTML(); if (v === 'auser') return auserHTML(); if (v === 'apay') return apayHTML(); if (v === 'contacts') return contactsHTML(); if (v === 'cviews') return cviewsHTML(); if (v === 'cpost') return cpostHTML(); if (v === 'cinact') return cinactHTML(); if (v === 'reach') return reachHTML(); if (v === 'queue') return queueHTML(); if (v === 'tpl') return tplHTML(); if (v === 'cols') return colHTML(); if (v === 'hist') return histHTML(); if (v === 'inbox') return inboxHTML(); if (v === 'ref') return refHTML(); if (v === 'groups') return groupsHTML(); if (v === 'excl') return exclHTML(); if (v === 'account') return accountHTML(); if (v === 'plan') return planHTML(); if (v === 'insights') return insightsHTML(); if (v === 'lists') return listsHTML(); if (v === 'list') return listDetailHTML();
+  const m = S.me, left = m.plan.expires ? (m.plan.expired ? 'ended' : `${m.plan.daysLeft} day${m.plan.daysLeft === 1 ? '' : 's'} left`) : '';
+  return `<div class="top"><h1 style="font-size:24px">More</h1></div><div style="margin-top:8px">
+<button class="menu-row" data-sub="account"><div><b>WhatsApp connection</b><span>${m.wa.up ? 'Connected' + (m.wa.number ? ' · +' + esc(m.wa.number) : '') : m.wa.linked ? 'Reconnecting…' : 'Not linked. Tap to link'}</span></div>${CHEV}</button>
+${f.plan ? `<button class="menu-row" data-sub="plan"><div><b>Plan and payment</b><span>${esc(m.plan.name || 'Your plan')}${left ? ' · ' + left : ''}</span></div>${CHEV}</button>` : ''}
+${f.insights ? `<button class="menu-row" data-sub="insights"><div><b>Insights</b><span>Who watches, and when</span></div>${CHEV}</button>` : ''}
+${f.admin ? `<button class="menu-row" data-sub="admin"><div><b>Admin</b><span>Users and payments</span></div>${CHEV}</button>` : ''}
+${f.contacts ? `<button class="menu-row" data-sub="contacts"><div><b>Contacts</b><span>Summary, who views you, inactive contacts</span></div>${CHEV}</button>` : ''}
+${f.reach ? `<button class="menu-row" data-sub="reach"><div><b>Reach-out</b><span>Friendly check-in messages</span></div>${CHEV}</button>` : ''}
+${f.queue ? `<button class="menu-row" data-sub="queue"><div><b>Queue many</b><span>Schedule up to 50 photos, videos or audio clips</span></div>${CHEV}</button>` : ''}
+${f.tpl ? `<button class="menu-row" data-sub="tpl"><div><b>Templates</b><span>Reuse a saved post</span></div>${CHEV}</button>` : ''}
+${f.col ? `<button class="menu-row" data-sub="cols"><div><b>Saved colours</b><span>Your own status backgrounds</span></div>${CHEV}</button>` : ''}
+${f.unsend ? `<button class="menu-row" data-sub="hist"><div><b>Delete a sent post</b><span>Remove a status from the last 24 hours</span></div>${CHEV}</button>` : ''}
+${f.inbox ? `<button class="menu-row" data-sub="inbox"><div><b>Inbox and notices</b><span>News and messages to the admin</span></div>${CHEV}</button>` : ''}
+${f.ref ? `<button class="menu-row" data-sub="ref"><div><b>Refer a friend</b><span>Earn free days</span></div>${CHEV}</button>` : ''}
+${f.groups ? `<button class="menu-row" data-sub="groups"><div><b>Groups and links</b><span>${fmtN(m.counts.groups)} groups</span></div>${CHEV}</button>` : ''}
+${f.excl ? `<button class="menu-row" data-sub="excl"><div><b>Exclusions</b><span>Numbers that never receive anything</span></div>${CHEV}</button>` : ''}
+${f.lists || f.glists ? `<button class="menu-row" data-sub="lists"><div><b>Lists</b><span>${fmtN(m.counts.lists)} saved</span></div>${CHEV}</button>` : ''}</div>`;
+}
+const cback = (v, l) => `<div class="top"><button class="back" data-sub="${v}">‹ ${l}</button></div>`, nrow = (a, b2) => `<li><div class="menu-row"><div><b style="font-size:16px">${a}</b>${b2 ? `<span>${b2}</span>` : ''}</div></div></li>`;
+const who = p => `+${esc(p.number)}${p.name ? ' · ' + esc(p.name) : ''}`;
+const stTxt = u => u.status === 'paused' ? 'Paused' : u.status === 'expired' ? 'Expired' : 'Active', waTxt = u => u.up ? 'Connected' : u.linked ? 'Reconnecting' : 'Not linked';
+function adminHTML() {
+  const f = S.me.features;
+  return `${backBtn('More')}<h1 style="font-size:24px">Admin</h1><div style="margin-top:8px">${f.au ? `<button class="menu-row" data-sub="ausers"><div><b>Users</b><span>${fmtN(S.au.total)} users</span></div>${CHEV}</button>` : ''}${f.ap ? `<button class="menu-row" data-sub="apay"><div><b>Payments</b><span>${S.ap.length ? S.ap.length + ' receipt' + (S.ap.length > 1 ? 's' : '') + ' waiting' : 'Nothing waiting'}</span></div>${CHEV}</button>` : ''}</div>`;
+}
+function ausersHTML() {
+  const q = S.aq.trim().toLowerCase(), all = S.au.users.filter(u => !q || u.id.includes(q) || (u.name || '').toLowerCase().includes(q)), shown = all.slice(0, 60);
+  return `${cback('admin', 'Admin')}<h1 style="font-size:24px">Users</h1><p style="color:var(--muted)">${fmtN(S.au.total)} users${S.au.total > 300 ? ' (newest 300 shown)' : ''}</p><input type="search" id="auq" placeholder="Search by ID or name" aria-label="Search users" value="${esc(S.aq)}"><ul class="rows" id="aulist" style="margin-top:10px">${aulistHTML(shown, all.length)}</ul>`;
+}
+function aulistHTML(shown, n) {
+  return shown.map(u => `<li><button class="menu-row" data-auid="${esc(u.id)}"><div><b style="font-size:16px">+${esc(u.id)}${u.name ? ' · ' + esc(u.name) : ''}</b><span>${stTxt(u)} · ${waTxt(u)}</span></div>${CHEV}</button></li>`).join('') + (n > shown.length ? nrow(`Showing ${shown.length} of ${fmtN(n)}. Search to narrow.`) : '') || nrow('No users match.');
+}
+function auserHTML() {
+  const u = S.aud, c = u.can, btn = (k, a, l, cls) => c[k] ? `<button class="btn ${cls || 'ghost'}" data-aact="${a}">${l}</button>` : '';
+  const num = (k, a, id, ph, l) => c[k] ? `<div class="two" style="margin-top:10px"><input type="number" id="${id}" placeholder="${ph}" aria-label="${ph}"><button class="btn ghost" data-aact="${a}">${l}</button></div>` : '';
+  return `${cback('ausers', 'Users')}<h1 style="font-size:24px">+${esc(u.id)}</h1><p style="color:var(--muted)">${esc(u.name || '')}${u.username ? ' @' + esc(u.username) : ''}${u.role !== 'user' ? ' · ' + u.role : ''}</p>
+<ul class="rows">${nrow(waTxt(u), 'WhatsApp')}${nrow(stTxt(u) + (u.plan ? ' · ' + esc(u.plan) : ''), 'Plan')}${nrow(u.expires ? when2(u.expires) : 'No expiry', 'Expires')}${nrow(`${u.today} of ${fmtN(u.limit)}`, 'Posts today')}</ul>
+<div class="two" style="margin-top:12px">${btn('pause', 'pause', 'Pause')}${btn('resume', 'resume', 'Resume')}</div>${num('limit', 'limit', 'alimit', 'New daily limit', 'Set limit')}${num('days', 'days', 'adays', 'Days to add', 'Add days')}
+<div class="two" style="margin-top:10px">${btn('repair', 'repair', 'Repair session')}${btn('unlink', 'unlink', 'Force unlink')}</div>${c.remove ? '<div style="margin-top:10px"><button class="btn ghost" data-aact="remove">Remove user</button></div>' : ''}
+<h2>Session health</h2><pre style="white-space:pre-wrap;font:14px/1.5 var(--body);margin:0">${esc(u.health || 'No data')}</pre>`;
+}
+function apayHTML() {
+  return `${cback('admin', 'Admin')}<h1 style="font-size:24px">Payments</h1><p style="color:var(--muted)">The receipt image is in your Telegram chat with the bot. Check it there before you approve.</p><ul class="rows">${S.ap.map(x => `<li><div class="menu-row" style="align-items:flex-start;gap:10px"><div style="min-width:0"><b style="font-size:16px">+${esc(x.uid)}</b><span>${x.plan ? esc(x.plan) + (x.price ? ' · ' + esc(x.price) : '') + (x.days ? ' · ' + x.days + ' days' : '') : 'No plan chosen'} · ${when2(x.at)}</span>${S.apOpen === x.uid ? `<div class="two" style="margin-top:8px"><input type="number" id="apdays" min="1" max="3650" value="${x.days || ''}" placeholder="Days to grant" aria-label="Days to grant"><button class="btn" data-apgo="${esc(x.uid)}">Approve</button></div>` : ''}</div><span style="display:flex;flex-direction:column;gap:6px"><button class="chip" data-apopen="${esc(x.uid)}">Approve</button><button class="chip" data-apno="${esc(x.uid)}">Decline</button></span></div></li>`).join('') || nrow('No receipts waiting.')}</ul>`;
+}
+function contactsHTML() {
+  const c2f = S.me.features, c = S.ct, st = [['Unique contacts', c.total], ['Phonebook', c.phonebook], ['From chats', c.chats], ['Status viewers', c.viewers], ['Group-only', c.groupOnly], ['In 2 or more groups', c.multi], ['Removed from audience', c.removed]];
+  return `${backBtn('More')}<h1 style="font-size:24px">Contacts</h1><ul class="rows">${st.map(([a, n]) => nrow(fmtN(n), a)).join('')}</ul>${c2f.exportn || c2f.dedupe ? `<div class="two" style="margin-top:12px">${c2f.exportn ? '<button class="btn ghost" data-cexport>Export numbers</button>' : ''}${c2f.dedupe ? '<button class="btn ghost" data-cdedupe>Fix duplicates</button>' : ''}</div><p style="color:var(--muted)">Exports are sent to your chat with the bot.</p>` : ''}<div style="margin-top:8px"><button class="menu-row" data-sub="cviews"><div><b>Who views me</b><span>People who opened your statuses</span></div>${CHEV}</button><button class="menu-row" data-sub="cpost"><div><b>Post viewers</b><span>Who saw each recent post</span></div>${CHEV}</button><button class="menu-row" data-sub="cinact"><div><b>Inactive for 6 months</b><span>Contacts who never view</span></div>${CHEV}</button></div>`;
+}
+function cviewsHTML() {
+  const v = S.cv; return `${cback('contacts', 'Contacts')}<h1 style="font-size:24px">Who views me</h1><p style="color:var(--muted)">${fmtN(v.total)} people opened your statuses. Only people with read receipts on are counted.</p><ul class="rows">${v.people.map(p => nrow(who(p), `${p.views} view${p.views === 1 ? '' : 's'} · last ${when2(p.last)}${p.post ? ' · “' + esc(p.post.slice(0, 40)) + '”' : ''}`)).join('') || nrow('No views recorded yet.')}</ul>${v.total > 200 ? `<p style="color:var(--muted)">Showing the top 200.</p>` : ''}`;
+}
+function cpostHTML() {
+  if (S.cpid && S.cpd) { const d = S.cpd; return `${cback('cpost', 'Posts')}<h1 style="font-size:24px">${fmtN(d.total)} viewers</h1><p style="color:var(--muted)">“${esc(d.preview.slice(0, 100))}” · ${when2(d.at)}</p><ul class="rows">${d.viewers.map(p => nrow(who(p))).join('') || nrow('Nobody yet.')}</ul>`; }
+  return `${cback('contacts', 'Contacts')}<h1 style="font-size:24px">Post viewers</h1><p style="color:var(--muted)">Choose a post to see who viewed it.</p><ul class="rows">${S.cp.map(h => `<li><button class="menu-row" data-cpid="${esc(h.id)}"><div><b style="font-size:16px">“${esc(h.preview.slice(0, 60))}”</b><span>${when2(h.at)} · ${fmtN(h.views)} views</span></div>${CHEV}</button></li>`).join('') || nrow('No posts yet.')}</ul>`;
+}
+function cinactHTML() {
+  const r = S.ci, h = `${cback('contacts', 'Contacts')}<h1 style="font-size:24px">Inactive for 6 months</h1>`;
+  if (!r.ok) return `${h}<div class="empty"><b>Not enough data yet</b>This needs 183 days of tracking and at least 10 posts, or real viewers would be listed wrongly. Tracking so far: ${r.tracked} days, ${r.posts} posts in the last 6 months.</div>`;
+  if (!r.total) return `${h}<div class="empty"><b>Everyone is active</b>Everyone viewed at least one post in the last 6 months.</div>`;
+  return `${h}<p style="color:var(--muted)">${fmtN(r.total)} contacts were added over 6 months ago and have not viewed a status since. People with read receipts off also look inactive.</p><button class="btn ghost" data-prune>Remove them from my audience</button><ul class="rows" style="margin-top:12px">${r.list.map(p => nrow(who(p), `${p.views} views · last ${p.last ? when2(p.last) : 'never'}`)).join('')}</ul>${r.total > 200 ? `<p style="color:var(--muted)">Showing 200 of ${fmtN(r.total)}.</p>` : ''}`;
+}
+function reachHTML() {
+  const r = S.rc, can = r.can;
+  return `${backBtn('More')}<h1 style="font-size:24px">Reach-out</h1><p style="color:var(--muted)">Sends a few short check-in messages a day (9 AM to 7 PM) from your WhatsApp to saved contacts you have not chatted with in ${r.minDays} days.</p>
+<ul class="rows">${nrow(r.on ? 'On' : 'Off', 'Status')}${nrow(`${r.today} of ${r.perDay}`, 'Sent today')}${nrow(fmtN(r.total), 'Sent in total')}${nrow(fmtN(r.replies), 'Replies')}${nrow(fmtN(r.viewed), 'Viewed your status since')}${nrow(fmtN(r.optOut), 'Asked to stop')}</ul>
+${can.toggle ? `<div style="margin-top:12px"><button class="btn${r.on ? ' ghost' : ''}" data-reachtog="${r.on ? 0 : 1}">${r.on ? 'Turn reach-out off' : 'Turn reach-out on'}</button></div>` : ''}
+${can.per ? `<h2>Messages per day</h2><div class="two"><input type="number" id="rper" min="1" max="${r.max}" value="${r.perDay}" aria-label="Messages per day"><button class="btn ghost" data-reachper>Save</button></div><p style="color:var(--muted)">Keep it low. Unwanted messages are a common reason WhatsApp restricts a number. The most allowed is ${r.max}.</p>` : ''}
+${can.msgs ? `<h2>Your messages</h2><textarea id="rmsgs" style="min-height:130px" aria-label="Reach-out messages">${esc(r.msgs.join('\n'))}</textarea><p style="color:var(--muted)">One per line, up to 5, 8 to 300 characters each. Use {name} for their first name.${r.custom ? '' : ' These are the defaults.'}</p><div class="two"><button class="btn ghost" data-reachdef>Use defaults</button><button class="btn" data-reachmsgs>Save messages</button></div>` : ''}`;
+}
+function queueHTML() {
+  const n = S.q.length, ready = n && S.q.every(x => x.status === 'ready'), ty = { image: 'Photo', video: 'Video', audio: 'Audio' };
+  return `${backBtn('More')}<h1 style="font-size:24px">Queue many</h1><p style="color:var(--muted)">Add up to 50 files. They go out one after another, starting at the time you pick.</p>
+<label class="lab" for="qfiles">Choose photos, videos or audio</label><input type="file" id="qfiles" multiple accept="image/jpeg,image/png,video/mp4,audio/mpeg,audio/ogg,.mp3,.ogg">
+<ul class="rows" style="margin-top:12px">${S.q.map((x, i) => `<li><div class="menu-row" style="align-items:flex-start;gap:10px"><div style="min-width:0;flex:1"><b style="font-size:16px">${i + 1}. ${ty[x.type]}${x.status === 'uploading' ? ' · uploading…' : x.status === 'failed' ? ' · failed' : ''}</b>${x.type === 'image' && x.url ? `<img src="${x.url}" alt="" style="display:block;max-height:90px;border-radius:8px;margin:6px 0">` : ''}${x.type !== 'audio' ? `<textarea data-qcap="${i}" maxlength="700" placeholder="Caption (optional)" aria-label="Caption ${i + 1}" style="min-height:56px;margin-top:6px">${esc(x.caption || '')}</textarea>` : ''}</div><button class="chip" data-qrm="${i}">Remove</button></div></li>`).join('') || '<li><div class="menu-row"><div><span>No files yet.</span></div></div></li>'}</ul>
+<label class="lab" for="qat" style="margin-top:12px">First post goes out at</label><input type="datetime-local" id="qat" value="${esc(S.qat || defaultWhen())}" min="${defaultWhen()}">
+<label class="lab" for="qgap" style="margin-top:12px">Then one every</label><select id="qgap">${[[1, 'hour'], [6, '6 hours'], [12, '12 hours'], [24, 'day']].map(([h, l]) => `<option value="${h}"${S.qgap === h ? ' selected' : ''}>${l}</option>`).join('')}</select>
+<div style="margin-top:14px"><button class="btn" data-qgo${ready ? '' : ' disabled'}>${n ? `Schedule ${n} post${n > 1 ? 's' : ''}` : 'Schedule'}</button></div>`;
+}
+function tplHTML() {
+  const ty = { text: 'Text', image: 'Photo', video: 'Video', audio: 'Audio' };
+  return `${backBtn('More')}<h1 style="font-size:24px">Templates</h1><p style="color:var(--muted)">Reuse a post you saved. Save one from the Posts screen by giving it a template name.</p><ul class="rows">${S.tpls.map(t => `<li><div class="menu-row" style="align-items:flex-start;gap:10px"><div style="min-width:0"><b style="font-size:16px">${esc(t.name)}</b><span>${ty[t.type] || 'Post'}${t.preview ? ' · ' + esc(t.preview) : ''}</span>${S.tplOpen === t.i ? `<div style="margin-top:8px"><input type="datetime-local" id="tplat"><div class="two" style="margin-top:8px"><button class="btn ghost" data-tplsched-cancel>Cancel</button><button class="btn" data-tplgo="${t.i}">Schedule</button></div></div>` : ''}</div><span style="display:flex;flex-direction:column;gap:6px"><button class="chip" data-tplnow="${t.i}">Post now</button><button class="chip" data-tplsched="${t.i}">Schedule</button><button class="chip" data-tpldel="${t.i}">Delete</button></span></div></li>`).join('') || '<li><div class="menu-row"><div><span>No templates yet.</span></div></div></li>'}</ul>`;
+}
+function colHTML() {
+  return `${backBtn('More')}<h1 style="font-size:24px">Saved colours</h1><p style="color:var(--muted)">These show up as extra backgrounds when you write a status.</p><ul class="rows">${S.cols.map(c => `<li><div class="menu-row"><div style="display:flex;align-items:center;gap:12px"><span style="width:26px;height:26px;border-radius:50%;background:${esc(c.hex)};display:inline-block;flex:0 0 auto"></span><div><b style="font-size:16px">${esc(c.name)}</b><span>${esc(c.hex)}</span></div></div><button class="chip" data-coldel="${esc(c.name)}">Remove</button></div></li>`).join('') || '<li><div class="menu-row"><div><span>None yet.</span></div></div></li>'}</ul><h2>Add a colour</h2><input type="color" id="cval" value="#FF5722" aria-label="Colour" style="width:100%;height:48px"><input type="text" id="cname" maxlength="20" placeholder="Name, for example Sunset" style="margin-top:10px"><div style="margin-top:10px"><button class="btn" data-coladd>Save colour</button></div>`;
+}
+function histHTML() {
+  return `${backBtn('More')}<h1 style="font-size:24px">Delete a sent post</h1><p style="color:var(--muted)">Removes a status from everyone it was sent to. Statuses disappear after 24 hours anyway. People who already viewed it did see it.</p><ul class="rows">${S.hist.map(h => `<li><div class="menu-row"><div style="min-width:0"><b style="font-size:16px">“${esc(h.preview.slice(0, 80))}”</b><span>${when2(h.at)} · ${fmtN(h.people)} people</span></div>${h.removing ? '<span>Removing…</span>' : `<button class="chip" data-hdel="${esc(h.id)}">Delete</button>`}</div></li>`).join('') || '<li><div class="menu-row"><div><span>No posts from the last 24 hours can be deleted.</span></div></div></li>'}</ul>`;
+}
+const when2 = t => t ? `${dayLabel(t)}, ${clock(t)}` : '';
+function inboxHTML() {
+  const i = S.inbox, row = (txt, sub) => `<li><div class="menu-row"><div><b style="font-size:16px;white-space:pre-wrap">${esc(txt)}</b>${sub ? `<span>${sub}</span>` : ''}</div></div></li>`;
+  return `${backBtn('More')}<h1 style="font-size:24px">Inbox and notices</h1><h2>Notices</h2><ul class="rows">${i.notices.map(n => row(n.text, when2(n.at))).join('') || '<li><div class="menu-row"><div><span>No notices right now.</span></div></div></li>'}</ul>${i.canMessage ? `<h2>Message the admin</h2><textarea id="admmsg" maxlength="4000" placeholder="Write your message" style="min-height:100px"></textarea><div style="margin-top:10px"><button class="btn" data-admsend>Send message</button></div>${i.mine.length ? `<h2>Your recent messages</h2><ul class="rows">${i.mine.map(m => row(m.text.slice(0, 120), when2(m.at) + (m.replied ? ' · replied in Telegram' : ' · sent'))).join('')}</ul>` : ''}` : ''}`;
+}
+function refHTML() {
+  const r = S.ref; if (!r.active) return `${backBtn('More')}<h1 style="font-size:24px">Refer a friend</h1><p style="color:var(--muted)">Referrals are not active right now.</p>`;
+  return `${backBtn('More')}<h1 style="font-size:24px">Refer a friend</h1><p style="color:var(--muted)">When someone joins with your link and makes their first payment, you get <b>${r.days} free days</b>.</p><div class="empty" style="word-break:break-all"><b style="font-size:15px">${esc(r.link)}</b></div><div style="margin-top:10px"><button class="btn" data-copy="${esc(r.link)}">Copy my link</button></div><h2>Your referrals</h2><ul class="rows"><li><div class="menu-row"><div><b>${fmtN(r.joined)}</b><span>joined</span></div></div></li><li><div class="menu-row"><div><b>${fmtN(r.paid)}</b><span>paid</span></div></div></li><li><div class="menu-row"><div><b>${fmtN(r.earned)}</b><span>free days earned</span></div></div></li></ul>`;
+}
+function glistHTML() {
+  const q = (S.gq || '').toLowerCase(), all = S.allg.groups.filter(g => (!S.gquiet || g.quiet) && (!q || (g.name || '').toLowerCase().includes(q))), shown = all.slice(0, 80);
+  return (shown.map(g => `<li><div class="menu-row"><div><b style="font-size:16px">${esc(g.name || '(no name)')}</b><span>${fmtN(g.size)} members${g.admin ? ' · you admin' : ''}${g.quiet ? ' · quiet' : ''}</span></div>${g.link ? `<button class="chip" data-copy="${esc(g.link)}">Copy link</button>` : ''}</div></li>`).join('') || '<li><div class="menu-row"><div><span>No groups match.</span></div></div></li>') + (all.length > 80 ? `<li><div class="menu-row"><div><span>Showing 80 of ${fmtN(all.length)}. Search to narrow.</span></div></div></li>` : '');
+}
+const gtabs = () => { const f = S.me.features, t = [['groups', 'Groups'], f.links && ['chat', 'Chat links'], f.deadl && ['dead', 'Dead links']].filter(Boolean); return t.length < 2 ? '' : `<div class="seg" style="grid-template-columns:repeat(${t.length},1fr);margin-top:12px">${t.map(([k, l]) => `<button data-gtab="${k}" aria-pressed="${S.gtab === k}">${l}</button>`).join('')}</div>`; };
+const lshort = u => esc(u.replace('https://', ''));
+function lbodyHTML() {
+  const k = S.lk, i = S.linfo;
+  const rows = k.items.map(x => `<li><div class="menu-row" style="align-items:flex-start;gap:10px"><div style="min-width:0;flex:1"><b style="font-size:15px;word-break:break-all">${lshort(x.url)}</b><span>Found in ${esc(x.where)}${x.at ? ' · ' + when2(x.at) : ''}</span>${S.lopen === x.code ? (i ? `<div style="margin-top:8px"><b>${esc(i.subject || '(no name)')}</b><span>${fmtN(i.size)} members${i.joined ? ' · you are already in this group' : ''}</span>${i.desc ? `<span>${esc(i.desc)}</span>` : ''}${i.joined ? '' : `<div style="margin-top:8px"><button class="btn" data-ljoin="${esc(x.code)}">Join group</button></div>`}</div>` : '<span>Checking…</span>') : ''}</div><span style="display:flex;flex-direction:column;gap:6px"><button class="chip" data-lcheck="${esc(x.code)}">Check</button><button class="chip" data-copy="${esc(x.url)}">Copy</button></span></div></li>`).join('') || nrow('Nothing found.', 'The bot saves group invite links it sees in your chats while it is connected.');
+  const pager = k.pages > 1 ? `<div class="two" style="margin-top:12px"><button class="btn ghost" data-lpage="${k.page - 1}"${k.page <= 1 ? ' disabled' : ''}>Previous</button><button class="btn ghost" data-lpage="${k.page + 1}"${k.page >= k.pages ? ' disabled' : ''}>Next</button></div><p style="color:var(--muted);text-align:center">Page ${k.page} of ${k.pages}</p>` : '';
+  return `<ul class="rows" style="margin-top:10px">${rows}</ul>${pager}`;
+}
+function chatTabHTML() {
+  return `<p style="color:var(--muted)">${fmtN(S.lk.total)} group invite links were found in your chats. Check one to see the group, then join it if you want.</p><input type="search" id="lq" placeholder="Search links or group names" aria-label="Search links" value="${esc(S.lq)}"><div style="margin-top:10px"><button class="btn ghost" data-lexport="chat">Send the list to the bot</button></div><div id="lbody">${lbodyHTML()}</div>`;
+}
+function deadTabHTML() {
+  const d = S.ld, f = S.me.features;
+  return `<p style="color:var(--muted)">${d.checking ? 'Checking your saved links. This takes a few minutes, come back later.' : `${fmtN(d.total)} dead links are waiting for review. Nothing is deleted until you confirm.`}</p><div class="two">${f.clean ? `<button class="btn ghost" data-lcheckall${d.checking ? ' disabled' : ''}>Check links now</button>` : ''}<button class="btn ghost" data-lexport="dead">Send the list to the bot</button></div><ul class="rows" style="margin-top:10px">${d.items.map(x => `<li><div class="menu-row"><div style="min-width:0"><b style="font-size:15px;word-break:break-all">${lshort(x.url)}</b><span>${x.where ? esc(x.where) + ' · ' : ''}found dead ${when2(x.at)}</span></div><button class="chip" data-ldel="${esc(x.code)}">Delete</button></div></li>`).join('') || nrow('No dead links.')}</ul>`;
+}
+function groupsHTML() {
+  const g = S.allg.groups, head = `${backBtn('More')}<h1 style="font-size:24px">Groups and links</h1>`;
+  if (S.gtab === 'chat' && S.lk) return head + gtabs() + chatTabHTML();
+  if (S.gtab === 'dead' && S.ld) return head + gtabs() + deadTabHTML();
+  return `${head}${gtabs()}<p style="color:var(--muted)">${fmtN(S.allg.total)} groups · ${g.filter(x => x.admin).length} you admin · ${g.filter(x => x.quiet).length} quiet or unnamed</p><div class="two"><button class="btn ghost" data-grefresh>Refresh groups</button><button class="btn ghost" data-gquiet aria-pressed="${!!S.gquiet}">${S.gquiet ? 'Show all' : 'Quiet only'}</button></div>${S.me.features.links ? '<div style="margin-top:10px"><button class="btn ghost" data-lexport="groups">Send group links to the bot</button></div>' : ''}<div style="margin-top:12px"><input type="search" id="ggq" placeholder="Search your groups" aria-label="Search groups" value="${esc(S.gq || '')}"></div><ul class="rows" id="glist">${glistHTML()}</ul>`;
+}
+function exclHTML() {
+  const n = S.excl, shown = n.slice(0, 200);
+  return `${backBtn('More')}<h1 style="font-size:24px">Exclusions</h1><p style="color:var(--muted)">${fmtN(n.length)} excluded. These numbers never get your statuses or messages.</p><label class="lab" for="exnums">Numbers, one per line, with country code</label><textarea id="exnums" style="min-height:90px"></textarea><div class="two" style="margin-top:10px"><button class="btn" data-exadd>Exclude</button><button class="btn ghost" data-exrm-all>Remove typed</button></div><ul class="rows">${shown.map(x => `<li><div class="menu-row"><div><b style="font-size:16px">+${esc(x)}</b></div><button class="chip" data-exrm="${esc(x)}">Remove</button></div></li>`).join('') || '<li><div class="menu-row"><div><span>No excluded numbers.</span></div></div></li>'}${n.length > 200 ? `<li><div class="menu-row"><div><span>Showing 200 of ${fmtN(n.length)}.</span></div></div></li>` : ''}</ul>`;
+}
+function accountHTML() {
+  const a = S.acct, w = a.wa, st = w.up ? 'Connected' + (w.number ? ' · +' + esc(w.number) : '') : w.linked ? 'Linked, reconnecting…' : 'Not linked';
+  const link = w.linked ? '' : `<h2>Link WhatsApp</h2>${a.code ? `<div class="empty"><b style="font:700 30px var(--head);letter-spacing:2px">${esc(a.code.match(/.{1,4}/g).join('-'))}</b>On your phone open WhatsApp → Linked devices → Link with phone number, then type this code. It expires in about 2 minutes.</div>` : `<label class="lab" for="lphone">Your WhatsApp number, with country code</label><input type="tel" id="lphone" inputmode="numeric" placeholder="2348012345678"><div style="margin-top:10px"><button class="btn" data-linkgo>Get code</button></div>`}`;
+  const row = (k, key, lab) => a.can[k] ? `<button class="menu-row" data-tog="${key}"><div><b>${lab}</b><span>${a[key] ? 'On' : 'Off'}</span></div></button>` : '';
+  const sw = row('alerts', 'alerts', 'Alerts') + row('weekly', 'weekly', 'Weekly report') + row('prune', 'autoPrune', 'Auto-prune');
+  const hl = a.health.length ? a.health.map(e => `<li><div class="menu-row"><div><b style="font-size:15px">${esc(e.kind)}</b><span>${dayLabel(e.t)}, ${clock(e.t)}${e.detail ? ' · ' + esc(e.detail) : ''}</span></div></div></li>`).join('') : '<li><div class="menu-row"><div><span>No problems recorded.</span></div></div></li>';
+  return `${backBtn('More')}<h1 style="font-size:24px">WhatsApp connection</h1><p style="color:var(--muted)">${st}</p>${link}${sw ? `<h2>Settings</h2><div>${sw}</div>` : ''}${w.linked ? `<div class="two" style="margin-top:14px">${a.can.repair ? '<button class="btn ghost" data-repair>Repair session</button>' : ''}<button class="btn ghost" data-unlink>Unlink</button></div>` : ''}<h2>Session health</h2><ul class="rows">${hl}</ul>`;
+}
+const backBtn = lab => `<div class="top"><button class="back" data-back="more">‹ ${lab}</button></div>`;
+function planHTML() {
+  const m = S.me, P = S.plans || { plans: [], general: {} }, left = m.plan.expires ? (m.plan.expired ? 'Ended' : `${m.plan.daysLeft} day${m.plan.daysLeft === 1 ? '' : 's'} left`) : 'No end date';
+  const anyPay = P.plans.some(p => p.payable);
+  const rows = P.plans.length ? P.plans.map(p => `<div class="item"><div class="row"><div><div class="t">${esc(p.name)}</div><div class="sub">${esc(p.days)} days</div></div><div class="price">${esc(p.price)}</div></div>
+${p.payable ? `<div style="margin-top:12px"><button class="btn" data-pay="${esc(p.id)}">Pay online</button></div>` : ''}
+${p.manual && (p.manual.bank || p.manual.link) ? `<details style="margin-top:10px"><summary class="link">${p.payable ? 'Or pay by bank transfer' : 'How to pay'}</summary>${p.manual.link ? `<div class="pre">${esc(p.manual.link)}</div>` : ''}${p.manual.bank ? `<div class="pre">${esc(p.manual.bank)}</div>` : ''}<div class="sub">After paying, send your receipt in the bot: Plan, then Send receipt.</div></details>` : ''}</div>`).join('')
+    : '<div class="empty"><b>No plans yet</b>Plans appear here when the admin adds them.</div>';
+  return `${backBtn('More')}<h1 style="font-size:24px;margin-top:6px">Plan and payment</h1>
+<ul class="rows" style="margin-top:8px"><li><span>Current plan${m.plan.name ? ' · ' + esc(m.plan.name) : ''}</span><b>${left}</b></li></ul>
+${anyPay && !P.email ? '<label class="lab" for="pemail">Email for your payment receipt</label><input type="email" id="pemail" placeholder="you@example.com" autocomplete="email">' : ''}
+${S.payWait ? '<div class="banner">Waiting for your payment. It activates by itself within a minute of paying.</div>' : ''}
+<h2>Choose a plan</h2>${rows}`;
+}
+function insightsHTML() {
+  const I = S.insights;
+  if (!I) return `${backBtn('More')}<div class="empty">Nothing to show yet.</div>`;
+  const max = Math.max(1, ...I.hours), order = I.hours.map((v, h) => [v, h]).sort((a, b) => b[0] - a[0]).filter(x => x[0] > 0).slice(0, 3).map(x => hour12(x[1]));
+  const bars = I.hours.map((v, h) => `<i class="${v && v >= max * 0.85 ? 'top' : ''}" style="height:${Math.max(3, Math.round(v / max * 100))}%" title="${hour12(h)}: ${v}"></i>`).join('');
+  const viewers = I.topViewers.length ? `<ul class="rows">${I.topViewers.map(v => `<li><span>${esc(v.name || '+' + v.number)}</span><b>${fmtN(v.views)}</b></li>`).join('')}</ul>` : '<div class="empty">No views recorded yet. They appear after people open your statuses.</div>';
+  const best = I.bestPosts.length ? `<ul class="rows">${I.bestPosts.map(b => `<li><span>${esc(b.preview)}</span><b>${fmtN(b.views)}</b></li>`).join('')}</ul>` : '<div class="empty">No posts yet.</div>';
+  return `${backBtn('More')}<h1 style="font-size:24px;margin-top:6px">Insights</h1>
+<h2>Best time to post</h2><div style="font:600 22px var(--head)">${order.length ? esc(order.join(', ')) : 'Not enough data yet'}</div>
+<div class="hours" aria-hidden="true">${bars}</div><div class="hl"><span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>12 AM</span></div>
+<h2>Last 7 days</h2><div class="big"><div><b>${fmtN(I.views7)}</b><span>views</span></div><div><b>${fmtN(I.viewers7)}</b><span>people</span></div><div><b>${fmtN(I.posts7)}</b><span>posts</span></div></div>
+<h2>Most loyal viewers</h2>${viewers}<h2>Best posts</h2>${best}<p class="sub" style="margin-top:18px">Counts come from people who have read receipts on.</p>`;
+}
+function listsHTML() {
+  const L = S.lists || { numbers: [], groups: [] }, f = S.me.features;
+  const rows = (kind, a) => a.length ? `<ul class="rows">${a.map(x => `<li><button class="menu-row" data-lk="${kind}" data-ln="${esc(x.name)}"><div><b style="font-size:17px">${esc(x.name)}</b></div><span>${fmtN(x.count)} ›</span></button></li>`).join('')}</ul>` : '<div class="empty">None yet.</div>';
+  const form = kind => S.newList === kind ? `<div style="margin:10px 0 0"><input type="text" id="lname" maxlength="30" placeholder="List name" aria-label="List name"><div class="two"><button class="btn ghost" data-newlist-cancel>Cancel</button><button class="btn" data-newlist-go>Create</button></div></div>` : `<button class="btn quiet" data-newlist="${kind}">+ New list</button>`;
+  return `${backBtn('More')}<h1 style="font-size:24px;margin-top:6px">Lists</h1>${f.lists ? `<h2>People</h2>${rows('numbers', L.numbers)}${form('numbers')}` : ''}${f.glists ? `<h2>Groups</h2>${rows('groups', L.groups)}${form('groups')}` : ''}`;
+}
+function listDetailHTML() {
+  const d = S.listDetail, isNum = d.kind === 'numbers', unit = isNum ? (d.total === 1 ? 'person' : 'people') : (d.total === 1 ? 'group' : 'groups');
+  const sub = m => isNum ? `${esc(m.name || '+' + m.number)}${m.name ? `<small style="display:block;color:var(--muted)">+${esc(m.number)}</small>` : ''}` : `${esc(m.name)}${m.gone ? '' : ` <small style="color:var(--muted)">· ${fmtN(m.size)}</small>`}`;
+  const members = d.members.length ? `<ul class="rows">${d.members.map(m => `<li><span>${sub(m)}</span><button class="link danger" data-lrm="${esc(isNum ? m.number : m.id)}">Remove</button></li>`).join('')}</ul>${d.total > d.members.length ? `<div class="sub">Showing the first ${d.members.length} of ${fmtN(d.total)}.</div>` : ''}` : '<div class="empty">Nothing in this list yet.</div>';
+  const add = isNum ? '<label class="lab" for="lnums">Add numbers</label><textarea id="lnums" placeholder="One number per line, with country code" style="min-height:100px"></textarea><div style="margin-top:10px"><button class="btn" data-addnums>Add numbers</button></div>'
+    : '<label class="lab" for="lgq">Add groups</label><input type="search" id="lgq" placeholder="Search your groups" aria-label="Search groups"><div id="lgres"></div><div style="margin-top:10px"><button class="btn" id="lgadd" data-lgadd disabled>Add selected</button></div>';
+  return `<div class="top"><button class="back" data-back="lists">‹ Lists</button></div><h1 style="font-size:24px;margin-top:6px">${esc(d.name)}</h1><div class="sub">${fmtN(d.total)} ${unit}</div>${add}<h2>In this list</h2>${members}<div style="margin-top:30px"><button class="link danger" data-ldel>Delete this list</button></div>`;
+}
+function lgresHTML() {
+  const inList = new Set(((S.listDetail || {}).members || []).map(m => m.id));
+  if (!S.lg.res.length) return '<div class="empty">No group matches.</div>';
+  return S.lg.res.map(g => inList.has(g.id) ? `<div class="pick"><span>${esc(g.name)}<small>Already in this list</small></span><i>✓</i></div>` : `<button class="pick" data-lgtoggle="${esc(g.id)}" aria-pressed="${!!S.lg.sel[g.id]}"><span>${esc(g.name)}<small>${fmtN(g.size)} members${g.admin ? ' · you admin' : ''}</small></span><i>${S.lg.sel[g.id] ? '✓' : ''}</i></button>`).join('');
+}
+async function searchListGroups(q) { try { S.lg.res = (await api('GET', '/api/groups?q=' + encodeURIComponent(q || ''))).groups; } catch (e) { S.lg.res = []; toast(e.message, true); } if ($('#lgres')) $('#lgres').innerHTML = lgresHTML(); }
+function lgUpdate() { const n = Object.keys(S.lg.sel).length, b = $('#lgadd'); if (b) { b.textContent = n ? `Add selected (${n})` : 'Add selected'; b.disabled = !n; } }
+function afterListRender() { if (S.tab === 'more' && S.view.more === 'list' && S.listDetail && S.listDetail.kind === 'groups') { if ($('#lgq')) $('#lgq').value = S.lg.q; searchListGroups(S.lg.q); lgUpdate(); } }
+function previewUpdate() {
+  const pv = $('#pv'), t = $('#txt'); if (!pv) return; const v = t.value, n = v.length;
+  pv.style.background = S.color; pv.style.color = ink(S.color); pv.style.fontSize = n > 300 ? '18px' : n > 140 ? '22px' : n > 60 ? '27px' : '34px';
+  pv.textContent = v || 'Your words appear here'; pv.style.opacity = v ? 1 : .8;
+  $('#cnt').textContent = `${n} of 700`; $('#go').disabled = !v.trim() || (S.when === 'later' && !$('#at').value);
+}
+/* edit sheet (posts + messages) */
+function sheetHTML() {
+  const s = S.sheet; if (!s) return '';
+  return `<div class="scrim" data-sheet-close><div class="sheet" role="dialog" aria-modal="true" aria-label="Edit"><h3>${s.kind === 'post' ? 'Edit post' : 'Edit message'}</h3><div class="sub">${s.hasText ? 'Change the words, the time, or both.' : 'Change the time or the caption.'}</div>
+<label class="lab" for="sheet-text">${s.isCaption ? 'Caption' : 'Text'}</label><textarea id="sheet-text" maxlength="${s.kind === 'post' ? 700 : 2000}" style="min-height:110px"></textarea>
+<label class="lab" for="sheet-at">Send at</label><input type="datetime-local" id="sheet-at">
+<div class="two"><button class="btn ghost" data-sheet-close-btn>Close</button><button class="btn" data-sheet-save>Save</button></div></div></div>`;
+}
+function openSheet(kind, item) {
+  S.sheet = { kind, id: item.id, isCaption: item.type !== 'text', hasText: true };
+  $('#sheetroot').innerHTML = sheetHTML(); $('#sheet-text').value = item.text || ''; $('#sheet-at').value = toLocalInput(item.at);
+}
+function closeSheet() { S.sheet = null; $('#sheetroot').innerHTML = ''; }
+
+/* ---------- navigation + actions ---------- */
+function routeHTML(tab) { return { home: homeHTML, posts: postsHTML, messages: msgsHTML, sending: jobsHTML, more: moreHTML }[tab](); }
+async function show(tab, keep) {
+  S.tab = tab; tabs();
+  const main = $('#main');
+  try { await loaders[tab](); } catch (e) { main.innerHTML = `<div class="full"><h1>Can’t load this</h1><p>${esc(e.message)}</p><button class="btn quiet" data-tab="${tab}">Try again</button></div>`; return; }
+  main.innerHTML = routeHTML(tab);
+  if (tab === 'posts') { const at = $('#at'); if (at) { at.value = S.lastAt || defaultWhen(); at.min = defaultWhen(); } if ($('#txt')) { $('#txt').value = S.draft || ''; previewUpdate(); } if (S.me.features.media && S.ptype !== 'text') renderMedia(); $('#plist').innerHTML = plistHTML(); }
+  if (tab === 'messages' && S.view.messages === 'new') { $('#mtxt').value = S.nm.text; const at = $('#mat'); if (at) { at.value = S.nm.at || defaultWhen(); S.nm.at = at.value; at.min = defaultWhen(); } renderTarget(); }
+  if (tab === 'more') afterListRender();
+  if (!keep) window.scrollTo(0, 0);
+}
+async function refresh() {
+  if (document.hidden || !S.me || S.sheet) return;
+  try { await loaders[S.tab]();
+    if (S.tab === 'home') $('#main').innerHTML = homeHTML(); else if (S.tab === 'posts') $('#plist').innerHTML = plistHTML(); else if (S.tab === 'messages' && S.view.messages === 'list') $('#main').innerHTML = msgsHTML(); else if (S.tab === 'sending') $('#main').innerHTML = jobsHTML(); } catch (e) {}
+}
+function startPayWait() {
+  S.payWait = { until: Date.now() + 4 * 60000, base: (S.me.plan.expires || 0) }; clearInterval(S.payT);
+  S.payT = setInterval(async () => {
+    if (!S.payWait || Date.now() > S.payWait.until) { clearInterval(S.payT); S.payWait = null; return; }
+    try { await loadMe(); if ((S.me.plan.expires || 0) > S.payWait.base) { S.payWait = null; clearInterval(S.payT); buzz(); toast('Payment confirmed. Your plan is active.'); if (S.tab === 'more' && S.view.more === 'plan') { await loadPlans(); $('#main').innerHTML = planHTML(); } } } catch (e) {}
+  }, 8000);
+}
+document.addEventListener('input', e => {
+  const t = e.target, id = t && t.id; if (!id) return;
+  if (id === 'txt') { S.draft = t.value; previewUpdate(); }
+  else if (id === 'at') { S.lastAt = t.value; previewUpdate(); }
+  else if (id === 'mtxt') { S.nm.text = t.value; nmUpdate(); }
+  else if (id === 'mat') { S.nm.at = t.value; nmUpdate(); }
+  else if (id === 'nums') { S.nm.numbers = t.value; nmUpdate(); }
+  else if (id === 'lgq') { S.lg.q = t.value; clearTimeout(gTimer); gTimer = setTimeout(() => searchListGroups(S.lg.q), 300); }
+  else if (id === 'gq') { S.nm.q = t.value; clearTimeout(gTimer); gTimer = setTimeout(() => searchGroups(S.nm.q), 300); }
+});
+document.addEventListener('click', async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  const d = b.dataset || {};
+  try {
+    if (d.tab) { if (d.tab === 'messages' && S.tab === 'messages') S.view.messages = 'list'; if (d.tab === 'more' && S.tab === 'more') S.view.more = 'menu'; return show(d.tab); }
+    if (d.color) { S.color = d.color; document.querySelectorAll('.sw').forEach(x => x.setAttribute('aria-checked', x.dataset.color === S.color)); return previewUpdate(); }
+    if (d.when) { S.when = d.when; return show('posts', true); }
+    if (b.id === 'go') {
+      b.disabled = true; const text = $('#txt').value.trim(), later = S.when === 'later';
+      const r = await api('POST', '/api/posts', { text, bg: S.color, when: S.when, at: later ? new Date($('#at').value).getTime() : undefined, saveAs: $('#tname') ? $('#tname').value : undefined });
+      S.draft = ''; $('#txt').value = ''; buzz();
+      if (r.scheduled) { toast(`Scheduled for ${dayLabel(r.at).toLowerCase()}, ${clock(r.at)}`); await loadPosts(); previewUpdate(); $('#plist').innerHTML = plistHTML(); }
+      else { toast('Posting started. Follow it under Sending.'); setTimeout(() => show('sending'), 700); }
+      return;
+    }
+    if (d.cancelPost !== undefined && await confirmAsk('Cancel this scheduled post?')) { await api('DELETE', '/api/posts/' + d.cancelPost); buzz(); toast('Post cancelled'); await loadPosts(); const l = $('#plist'); if (l) l.innerHTML = plistHTML(); else $('#main').innerHTML = homeHTML(); return; }
+    if (d.cancelMsg !== undefined && await confirmAsk('Cancel this scheduled message?')) { await api('DELETE', '/api/messages/' + d.cancelMsg); buzz(); toast('Message cancelled'); await loadMsgs(); $('#main').innerHTML = msgsHTML(); return; }
+    if (d.stop !== undefined && await confirmAsk('Stop this send? People who already received it keep it.')) { await api('POST', '/api/jobs/' + d.stop + '/stop'); buzz(); toast('Stopping'); await loadJobs(); $('#main').innerHTML = jobsHTML(); return; }
+    /* edit sheet */
+    if (d.editPost !== undefined) { const p = S.posts.find(x => String(x.id) === d.editPost); if (p) openSheet('post', p); return; }
+    if (d.editMsg !== undefined) { const m = S.msgs.find(x => String(x.id) === d.editMsg); if (m) openSheet('msg', m); return; }
+    if (d.sheetClose !== undefined && e.target === b || d.sheetCloseBtn !== undefined) return closeSheet();
+    if (d.sheetSave !== undefined) {
+      const s = S.sheet, at = new Date($('#sheet-at').value).getTime(), text = $('#sheet-text').value;
+      await api('POST', `/api/${s.kind === 'post' ? 'posts' : 'messages'}/${s.id}/edit`, { text, at }); buzz(); toast('Saved'); closeSheet();
+      if (s.kind === 'post') { await loadPosts(); const l = $('#plist'); if (l) l.innerHTML = plistHTML(); else $('#main').innerHTML = homeHTML(); } else { await loadMsgs(); $('#main').innerHTML = msgsHTML(); }
+      return;
+    }
+    /* new message */
+    if (d.newmsg !== undefined) { S.nm = newNm(); S.view.messages = 'new'; return show('messages'); }
+    if (d.back === 'messages') { S.view.messages = 'list'; return show('messages'); }
+    if (d.kind) { S.nm.kind = d.kind; document.querySelectorAll('[data-kind]').forEach(x => x.setAttribute('aria-pressed', x.dataset.kind === d.kind)); return renderTarget(); }
+    if (d.mwhen) { S.nm.when = d.mwhen; return show('messages', true); }
+    if (d.list !== undefined) { S.nm.list = d.list; $('#target').innerHTML = targetHTML(); return nmUpdate(); }
+    if (d.glist !== undefined) { S.nm.grouplist = d.glist; $('#target').innerHTML = targetHTML(); return nmUpdate(); }
+    if (d.chan !== undefined) { const c = S.nm.channels, i = c.indexOf(d.chan); i < 0 ? c.push(d.chan) : c.splice(i, 1); $('#target').innerHTML = targetHTML(); return nmUpdate(); }
+    if (d.gtoggle !== undefined) { const g = S.gres.find(x => x.id === d.gtoggle); if (S.nm.groups[d.gtoggle]) delete S.nm.groups[d.gtoggle]; else S.nm.groups[d.gtoggle] = g ? g.name : d.gtoggle; $('#gres').innerHTML = gresHTML(); return nmUpdate(); }
+    if (b.id === 'msend') {
+      b.disabled = true; const n = S.nm, later = n.when === 'later';
+      const r = await api('POST', '/api/messages', { text: n.text.trim(), target: nmTarget(), when: n.when, at: later ? new Date(n.at).getTime() : undefined });
+      buzz(); S.nm = newNm(); S.view.messages = 'list';
+      if (r.scheduled) { toast(`Scheduled for ${r.recipients} ${r.recipients === 1 ? 'recipient' : 'recipients'}`); await show('messages'); } else { toast('Sending started. Follow it under Sending.'); setTimeout(() => show('sending'), 700); }
+      return;
+    }
+    /* more */
+    if (d.lk !== undefined) { S.listOpen = { kind: d.lk, name: d.ln }; S.lg = { sel: {}, q: '', res: [] }; S.view.more = 'list'; return show('more'); }
+    if (d.newlist !== undefined) { S.newList = d.newlist; $('#main').innerHTML = moreHTML(); const i = $('#lname'); if (i && i.focus) i.focus(); return; }
+    if (d.newlistCancel !== undefined) { S.newList = null; $('#main').innerHTML = moreHTML(); return; }
+    if (d.newlistGo !== undefined) { const kind = S.newList, name = $('#lname').value.trim(); await api('POST', '/api/lists', { kind, name }); buzz(); toast('List created'); S.listOpen = { kind, name }; S.newList = null; S.lg = { sel: {}, q: '', res: [] }; S.view.more = 'list'; return show('more'); }
+    if (d.addnums !== undefined) {
+      const nums = parseNums($('#lnums').value); if (!nums.length) { toast('Add at least one valid number with country code.', true); return; }
+      b.disabled = true; let added = 0;
+      try { for (let i = 0; i < nums.length; i += 800) { const r = await api('POST', '/api/lists/add', { kind: 'numbers', name: S.listOpen.name, items: nums.slice(i, i + 800) }); added += r.added; } } finally { b.disabled = false; }
+      buzz(); toast(`Added ${fmtN(added)}${nums.length > added ? `, ${fmtN(nums.length - added)} already there` : ''}`); await loadListDetail(); $('#main').innerHTML = listDetailHTML(); return;
+    }
+    if (d.lgtoggle !== undefined) { const g = S.lg.res.find(x => x.id === d.lgtoggle); if (S.lg.sel[d.lgtoggle]) delete S.lg.sel[d.lgtoggle]; else S.lg.sel[d.lgtoggle] = g ? g.name : d.lgtoggle; $('#lgres').innerHTML = lgresHTML(); return lgUpdate(); }
+    if (d.lgadd !== undefined) { b.disabled = true; const r = await api('POST', '/api/lists/add', { kind: 'groups', name: S.listOpen.name, items: Object.keys(S.lg.sel) }); S.lg.sel = {}; buzz(); toast(`Added ${r.added} group${r.added === 1 ? '' : 's'}`); await loadListDetail(); $('#main').innerHTML = listDetailHTML(); afterListRender(); return; }
+    if (d.lrm !== undefined) { await api('POST', '/api/lists/remove', { kind: S.listOpen.kind, name: S.listOpen.name, items: [d.lrm] }); buzz(); await loadListDetail(); $('#main').innerHTML = listDetailHTML(); afterListRender(); return; }
+    if (d.ldel !== undefined) {
+      const u = S.listDetail.used || 0;
+      if (!(await confirmAsk(`Delete “${S.listOpen.name}”?${u ? ` ${u} scheduled message${u === 1 ? '' : 's'} use it and will not send.` : ''}`))) return;
+      await api('POST', '/api/lists/delete', { kind: S.listOpen.kind, name: S.listOpen.name }); buzz(); toast('List deleted'); S.listOpen = null; S.view.more = 'lists'; return show('more');
+    }
+    if (d.back === 'lists') { S.view.more = 'lists'; S.listOpen = null; return show('more'); }
+    if (d.gtab) { S.gtab = d.gtab; S.lpage = 1; S.lopen = null; S.linfo = null; return show('more'); }
+    if (d.lpage !== undefined) { S.lpage = Number(d.lpage); S.lopen = null; S.linfo = null; await loadLinks(); $('#lbody').innerHTML = lbodyHTML(); window.scrollTo({ top: 0 }); return; }
+    if (d.lcheck !== undefined) {
+      if (S.lopen === d.lcheck) { S.lopen = null; S.linfo = null; $('#lbody').innerHTML = lbodyHTML(); return; }
+      S.lopen = d.lcheck; S.linfo = null; $('#lbody').innerHTML = lbodyHTML();
+      try { S.linfo = await api('POST', '/api/links/info', { code: d.lcheck }); } catch (x) { S.lopen = null; $('#lbody').innerHTML = lbodyHTML(); throw x; }
+      $('#lbody').innerHTML = lbodyHTML(); return;
+    }
+    if (d.ljoin !== undefined && await confirmAsk('Join this group with your WhatsApp? Joining many groups quickly can get a number restricted, so go slowly.')) { b.disabled = true; try { await api('POST', '/api/links/join', { code: d.ljoin }); buzz(); toast('Joined the group'); S.linfo.joined = true; $('#lbody').innerHTML = lbodyHTML(); } finally { b.disabled = false; } return; }
+    if (d.lexport) { b.disabled = true; try { const r = await api('POST', '/api/links/export', { kind: d.lexport }); buzz(); toast(`Sent ${r.total} links to your chat with the bot`); } finally { b.disabled = false; } return; }
+    if (d.lcheckall !== undefined) { await api('POST', '/api/links/check'); toast('Checking your links. This takes a few minutes.'); await loadLinks(); $('#main').innerHTML = groupsHTML(); return; }
+    if (d.ldel !== undefined && await confirmAsk('Permanently delete this dead link record?')) { await api('POST', '/api/links/dead/delete', { code: d.ldel }); buzz(); await loadLinks(); $('#main').innerHTML = groupsHTML(); return; }
+    if (d.cexport !== undefined) { b.disabled = true; try { const r = await api('POST', '/api/contacts/export'); buzz(); toast(`Sent ${r.total} contacts to your chat with the bot`); } finally { b.disabled = false; } return; }
+    if (d.cdedupe !== undefined && await confirmAsk('Merge duplicate contacts and remove invalid numbers?')) { b.disabled = true; try { const r = await api('POST', '/api/contacts/dedupe'); buzz(); toast(`Merged ${r.merged}, removed ${r.removed} invalid`); await loadContacts(); $('#main').innerHTML = contactsHTML(); } finally { b.disabled = false; } return; }
+    if (d.auid !== undefined) { S.aid = d.auid; S.view.more = 'auser'; return show('more'); }
+    if (d.aact) {
+      const a = d.aact, msg = { remove: 'Remove this user and archive their data? Their WhatsApp is unlinked.', unlink: 'Force unlink this user\'s WhatsApp?', pause: 'Pause this user?' }[a];
+      if (msg && !(await confirmAsk(msg))) return;
+      const val = a === 'limit' ? Number($('#alimit').value) : a === 'days' ? Number($('#adays').value) : undefined;
+      await api('POST', `/api/admin/users/${S.aid}/action`, { action: a, value: val }); buzz(); toast('Done');
+      if (a === 'remove') { S.view.more = 'ausers'; return show('more'); }
+      await loadAUser(); $('#main').innerHTML = auserHTML(); return;
+    }
+    if (d.apopen !== undefined) { S.apOpen = d.apopen; $('#main').innerHTML = apayHTML(); return; }
+    if (d.apgo !== undefined) { await api('POST', '/api/admin/payments/decide', { uid: d.apgo, action: 'approve', days: Number($('#apdays').value) }); S.apOpen = null; buzz(); toast('Approved. The user was told.'); await loadAdmin(); $('#main').innerHTML = apayHTML(); return; }
+    if (d.apno !== undefined && await confirmAsk('Decline this receipt? The user is told it was declined.')) { await api('POST', '/api/admin/payments/decide', { uid: d.apno, action: 'decline' }); buzz(); toast('Declined'); await loadAdmin(); $('#main').innerHTML = apayHTML(); return; }
+    if (d.cpid !== undefined) { S.cpid = d.cpid; S.view.more = 'cpost'; return show('more'); }
+    if (d.prune !== undefined && await confirmAsk('Remove these contacts from your posting audience? They stay saved, they just stop receiving posts.')) { const r = await api('POST', '/api/contacts/prune'); buzz(); toast(`Removed ${r.removed} contacts`); await loadInactive(); $('#main').innerHTML = cinactHTML(); return; }
+    if (d.reachtog !== undefined) {
+      const on = d.reachtog === '1';
+      if (on && !(await confirmAsk('Turn on reach-out? It sends short messages from YOUR WhatsApp to contacts you have not chatted with. Unwanted messages can get a number restricted, so keep the daily number low.'))) return;
+      await api('POST', '/api/reach/toggle', { on }); buzz(); await loadReach(); $('#main').innerHTML = reachHTML(); return;
+    }
+    if (d.reachper !== undefined) { await api('POST', '/api/reach/settings', { perDay: Number($('#rper').value) }); buzz(); toast('Saved'); await loadReach(); $('#main').innerHTML = reachHTML(); return; }
+    if (d.reachmsgs !== undefined) { await api('POST', '/api/reach/settings', { msgs: $('#rmsgs').value.split('\n') }); buzz(); toast('Messages saved'); await loadReach(); $('#main').innerHTML = reachHTML(); return; }
+    if (d.reachdef !== undefined) { await api('POST', '/api/reach/settings', { msgs: [] }); buzz(); toast('Using the default messages'); await loadReach(); $('#main').innerHTML = reachHTML(); return; }
+    if (d.qrm !== undefined) { S.q.splice(Number(d.qrm), 1); $('#main').innerHTML = queueHTML(); return; }
+    if (d.qgo !== undefined) {
+      b.disabled = true;
+      try { const r = await api('POST', '/api/queue', { items: S.q.map(x => ({ type: x.type, upload: x.token, caption: x.caption })), at: new Date($('#qat').value).getTime(), gap: S.qgap }); S.q = []; S.qat = ''; buzz(); toast(`${r.scheduled} posts scheduled`); await loadPosts(); show('posts', true); }
+      catch (x) { b.disabled = false; throw x; } return;
+    }
+    if (d.ptype) { S.ptype = d.ptype; S.media = null; return show('posts', true); }
+    if (b.id === 'mgo') {
+      b.disabled = true; const later = S.when === 'later';
+      try {
+        const r = await api('POST', '/api/posts', { type: S.media.type, upload: S.media.token, caption: $('#cap') ? $('#cap').value : undefined, when: S.when, at: later ? new Date($('#at').value).getTime() : undefined, saveAs: $('#tname') ? $('#tname').value : undefined });
+        S.media = null; buzz();
+        if (r.scheduled) { toast(`Scheduled for ${dayLabel(r.at).toLowerCase()}, ${clock(r.at)}`); await loadPosts(); show('posts', true); } else { toast('Posting started. Follow it under Sending.'); setTimeout(() => show('sending'), 700); }
+      } catch (x) { b.disabled = false; throw x; } return;
+    }
+    if (d.tplnow !== undefined) { if (await confirmAsk('Post this template now to your whole audience?')) { await api('POST', '/api/templates/use', { index: Number(d.tplnow), when: 'now' }); buzz(); toast('Posting started. Follow it under Sending.'); setTimeout(() => show('sending'), 700); } return; }
+    if (d.tplsched !== undefined) { S.tplOpen = Number(d.tplsched); $('#main').innerHTML = tplHTML(); const at = $('#tplat'); if (at) { at.value = defaultWhen(); at.min = defaultWhen(); } return; }
+    if (d.tplschedCancel !== undefined) { S.tplOpen = null; $('#main').innerHTML = tplHTML(); return; }
+    if (d.tplgo !== undefined) { await api('POST', '/api/templates/use', { index: Number(d.tplgo), when: 'later', at: new Date($('#tplat').value).getTime() }); S.tplOpen = null; buzz(); toast('Scheduled'); $('#main').innerHTML = tplHTML(); return; }
+    if (d.tpldel !== undefined && await confirmAsk('Delete this template?')) { await api('POST', '/api/templates/delete', { index: Number(d.tpldel) }); buzz(); await loadTpls(); $('#main').innerHTML = tplHTML(); return; }
+    if (d.coladd !== undefined) { await api('POST', '/api/colours', { hex: $('#cval').value, name: $('#cname').value }); buzz(); toast('Colour saved'); await loadCols(); $('#main').innerHTML = colHTML(); return; }
+    if (d.coldel !== undefined && await confirmAsk('Remove this colour?')) { await api('POST', '/api/colours/delete', { name: d.coldel }); buzz(); await loadCols(); $('#main').innerHTML = colHTML(); return; }
+    if (d.hdel !== undefined && await confirmAsk('Remove this post from everyone it was sent to? People who already viewed it did see it.')) { await api('POST', '/api/history/delete', { id: d.hdel }); buzz(); toast('Removing the post…'); await loadHist(); $('#main').innerHTML = histHTML(); return; }
+    if (d.admsend !== undefined) { const v = $('#admmsg').value; b.disabled = true; try { const r = await api('POST', '/api/inbox/message', { text: v }); buzz(); toast(r.notified ? 'Sent to the admin' : 'Saved. The admin could not be notified right now'); await loadInbox(); $('#main').innerHTML = inboxHTML(); } finally { b.disabled = false; } return; }
+    if (d.grefresh !== undefined) { b.disabled = true; try { const r = await api('POST', '/api/groups/refresh'); toast(`Refreshed ${r.total} groups`); await loadAllGroups(); $('#main').innerHTML = groupsHTML(); } finally { b.disabled = false; } return; }
+    if (d.gquiet !== undefined) { S.gquiet = !S.gquiet; $('#main').innerHTML = groupsHTML(); return; }
+    if (d.copy) { try { await navigator.clipboard.writeText(d.copy); toast('Link copied'); } catch (x) { toast(d.copy); } return; }
+    if (d.exadd !== undefined || d.exrmAll !== undefined) { const v = $('#exnums').value; await api('POST', '/api/exclusions', { numbers: v, action: d.exadd !== undefined ? 'add' : 'remove' }); buzz(); toast(d.exadd !== undefined ? 'Excluded' : 'Removed'); await loadExcl(); $('#main').innerHTML = exclHTML(); return; }
+    if (d.exrm) { await api('POST', '/api/exclusions', { numbers: d.exrm, action: 'remove' }); buzz(); await loadExcl(); $('#main').innerHTML = exclHTML(); return; }
+    if (d.linkgo !== undefined) { b.disabled = true; try { await api('POST', '/api/link', { phone: $('#lphone').value }); toast('Requesting your code…'); setTimeout(async () => { try { await loadAccount(); if (S.tab === 'more' && S.view.more === 'account') $('#main').innerHTML = accountHTML(); } catch (x) {} }, 3000); } catch (x) { b.disabled = false; throw x; } return; }
+    if (d.tog) { await api('POST', '/api/account/toggle', { key: d.tog }); buzz(); await loadAccount(); $('#main').innerHTML = accountHTML(); return; }
+    if (d.repair !== undefined && await confirmAsk('Repair the WhatsApp session? You stay logged in.')) { await api('POST', '/api/repair'); buzz(); toast('Repaired. Reconnecting…'); await loadAccount(); $('#main').innerHTML = accountHTML(); return; }
+    if (d.unlink !== undefined && await confirmAsk('Unlink WhatsApp from this account?')) { await api('POST', '/api/unlink'); buzz(); toast('Unlinked'); await Promise.all([loadMe(), loadAccount()]); $('#main').innerHTML = accountHTML(); return; }
+    if (d.sub) { if (d.sub === 'cpost') S.cpid = null; S.view.more = d.sub; return show('more'); }
+    if (d.back === 'more') { S.view.more = 'menu'; return show('more'); }
+    if (d.pay !== undefined) {
+      b.disabled = true; const email = $('#pemail') ? $('#pemail').value.trim() : '';
+      try { const r = await api('POST', '/api/pay', { planId: d.pay, email: email || undefined }); openLink(r.url); toast('Payment page opened. Your plan activates by itself after you pay.'); if (!DEMO) startPayWait(); else S.payWait = { until: 0, base: 0 }; await loadPlans(); $('#main').innerHTML = planHTML(); }
+      finally { b.disabled = false; } return;
+    }
+  } catch (err) { buzz('error'); toast(err.message, true); if (b.id === 'go' || b.id === 'msend') b.disabled = false; }
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && S.sheet) closeSheet(); });
+
+/* ---------- demo data (used for ?demo and the preview page) ---------- */
+const D = { posts: null, msgs: null, jobs: null, plan: 5, lists: null };
+const DG = ['Church Youth', 'Church Choir', 'Business Owners', 'Lagos Traders', 'Family Circle', 'Old School Friends', 'Alumni 2012', 'Football Fans', 'Neighbours Watch', 'Online Sellers'];
+function demo(method, full, body) {
+  const [path, qs] = full.split('?'), h = 36e5, q = new URLSearchParams(qs || '');
+  D.posts ||= [{ id: 1, type: 'text', text: 'Good night everyone 🌙 see you tomorrow', at: Date.now() + 3.2 * h, repeat: 'daily', bg: '#263238' }, { id: 2, type: 'text', text: 'Weekend sale starts at 9 AM. Everything 20% off.', at: Date.now() + 15 * h, repeat: 'none', bg: '#E53935' }, { id: 3, type: 'image', text: 'New arrivals are in', at: Date.now() + 52 * h, repeat: 'weekly', bg: null }];
+  D.msgs ||= [{ id: 11, type: 'text', text: 'Happy new week 🙏 Wishing you grace and favour.', at: Date.now() + 28 * h, repeat: 'weekly', target: { kind: 'grouplist', name: 'Church groups', count: 6 } }, { id: 12, type: 'image', text: 'Event invite: Saturday 4 PM', at: Date.now() + 70 * h, repeat: 'none', target: { kind: 'list', name: 'Customers', count: 184 } }];
+  D.lists ||= { numbers: { Customers: Array.from({ length: 184 }, (_, i) => '23480' + String(11110000 + i)), Family: ['2348012340001', '2348012340002', '2348012340003'] }, groups: { 'Church groups': ['g0', 'g1', 'g4', 'g5', 'g6', 'g8'], 'Business groups': ['g2', 'g3', 'g9', 'g7'] } };
+  D.jobs ||= [{ id: 21, type: 'status', preview: 'Black Friday is here', total: 2500, sent: 1180, started: Date.now() - 6 * 60000, stopping: false }];
+  D.jobs.forEach(j => { if (!j.stopping && j.sent < j.total) j.sent = Math.min(j.total, j.sent + 70); });
+  const r = v => new Promise(res => setTimeout(() => res(v), 120)), key = method + ' ' + path, last = path.split('/').pop();
+  if (key === 'GET /api/me') return r({ id: '1', name: 'Ruthy', role: 'user', wa: { linked: true, up: true, number: '2348168593820', name: 'Ruthy' }, plan: { name: 'Monthly', expires: Date.now() + D.plan * 24 * h, expired: false, paused: false, daysLeft: D.plan }, usage: { today: 8, limit: 10, total: 142 }, counts: { contacts: 25716, groups: 496, scheduledPosts: D.posts.length, scheduledMessages: D.msgs.length, lists: 4 }, features: { post: true, schedule: true, messages: true, sending: true, lists: true, glists: true, media: true, links: true, deadl: true, clean: true, exportn: true, dedupe: true, admin: true, au: true, ap: true, contacts: true, reach: true, queue: true, tpl: true, col: true, unsend: true, inbox: true, ref: true, groups: true, excl: true, plan: true, insights: true } });
+  if (key === 'GET /api/posts') return r({ posts: [...D.posts].sort((a, b) => a.at - b.at) });
+  if (key === 'POST /api/posts') { if (body.when === 'later') { D.posts.push({ id: Date.now(), type: 'text', text: body.text, at: body.at, repeat: 'none', bg: body.bg }); return r({ scheduled: true, at: body.at }); } D.jobs.push({ id: Date.now(), type: 'status', preview: body.text.slice(0, 40), total: 2500, sent: 0, started: Date.now(), stopping: false }); return r({ started: true }); }
+  if (method === 'DELETE' && path.startsWith('/api/posts/')) { D.posts = D.posts.filter(p => String(p.id) !== last); return r({ ok: true }); }
+  if (method === 'POST' && /^\/api\/posts\/[^/]+\/edit$/.test(path)) { const p = D.posts.find(x => String(x.id) === path.split('/')[3]); if (p) { if (body.text !== undefined) p.text = body.text; if (body.at !== undefined) p.at = body.at; } return r({ ok: true }); }
+  if (key === 'GET /api/messages') return r({ messages: [...D.msgs].sort((a, b) => a.at - b.at) });
+  if (method === 'DELETE' && path.startsWith('/api/messages/')) { D.msgs = D.msgs.filter(p => String(p.id) !== last); return r({ ok: true }); }
+  if (method === 'POST' && /^\/api\/messages\/[^/]+\/edit$/.test(path)) { const m = D.msgs.find(x => String(x.id) === path.split('/')[3]); if (m) { if (body.text !== undefined) m.text = body.text; if (body.at !== undefined) m.at = body.at; } return r({ ok: true }); }
+  if (key === 'POST /api/messages') { const t = body.target, n = t.kind === 'numbers' ? t.numbers.length : t.kind === 'list' ? 184 : t.kind === 'grouplist' ? 6 : t.ids.length; if (body.when === 'later') { D.msgs.push({ id: Date.now(), type: 'text', text: body.text, at: body.at, repeat: 'none', target: { kind: t.kind, name: t.name, count: n } }); return r({ scheduled: true, at: body.at, recipients: n }); } D.jobs.push({ id: Date.now(), type: 'message', preview: body.text.slice(0, 40), total: n, sent: 0, started: Date.now(), stopping: false }); return r({ started: true, recipients: n }); }
+  if (key === 'GET /api/groups') { const term = (q.get('q') || '').toLowerCase(); return r({ groups: DG.filter(g => g.toLowerCase().includes(term)).map((g, i) => ({ id: 'g' + DG.indexOf(g), name: g, size: 40 + i * 37, admin: i % 3 === 0 })), total: 496 }); }
+  if (key === 'GET /api/channels') return r({ channels: [{ id: 'c1', name: 'Waapo News', role: 'OWNER' }] });
+  if (key === 'GET /api/jobs') return r({ jobs: D.jobs });
+  if (method === 'POST' && path.endsWith('/stop')) { const j = D.jobs.find(x => String(x.id) === path.split('/')[3]); if (j) { j.stopping = true; setTimeout(() => { D.jobs = D.jobs.filter(x => x !== j); }, 2500); } return r({ ok: true }); }
+  const cnt = o => Object.entries(o).map(([name, v]) => ({ name, count: v.length }));
+  if (key === 'GET /api/lists') return r({ numbers: cnt(D.lists.numbers), groups: cnt(D.lists.groups) });
+  if (key === 'GET /api/list') { const kind = q.get('kind'), name = q.get('name'), L = D.lists[kind] && D.lists[kind][name]; if (!L) return Promise.reject(new Error('That list no longer exists.')); const used = D.msgs.filter(m => m.target && m.target.name === name).length;
+    return r({ kind, name, total: L.length, used, members: kind === 'numbers' ? L.slice(0, 200).map(n => ({ number: n, name: { '2348011111111': 'Ada Obi', '2348022222222': 'Chidi Eze', '2348012340001': 'Bola' }[n] || '' })) : L.slice(0, 200).map(id => ({ id, name: DG[+id.slice(1)] || 'A group you have left', size: 40 + (+id.slice(1)) * 37 })) }); }
+  if (key === 'POST /api/lists') { const L = D.lists[body.kind]; if (!body.name || !body.name.trim()) return Promise.reject(new Error('Give the list a name of 1 to 30 characters.')); if (L[body.name.trim()]) return Promise.reject(new Error('You already have a list with that name.')); L[body.name.trim()] = []; return r({ ok: true, name: body.name.trim(), total: 0, skipped: 0 }); }
+  if (key === 'POST /api/lists/add') { const L = D.lists[body.kind][body.name]; if (!L) return Promise.reject(new Error('That list no longer exists.')); const before = new Set(L), add = [...new Set((body.items || []).filter(x => !before.has(x)))]; L.push(...add); return r({ ok: true, added: add.length, skipped: 0, total: L.length }); }
+  if (key === 'POST /api/lists/remove') { const L = D.lists[body.kind][body.name], n = L.length; D.lists[body.kind][body.name] = L.filter(x => !(body.items || []).includes(x)); return r({ ok: true, removed: n - D.lists[body.kind][body.name].length, total: D.lists[body.kind][body.name].length }); }
+  if (key === 'POST /api/lists/delete') { delete D.lists[body.kind][body.name]; return r({ ok: true }); }
+  if (key === 'GET /api/plans') return r({ online: true, email: '', general: { link: '', bank: '' }, plans: [{ id: 1, name: 'Weekly', price: '₦2,000', days: 7, payable: true, manual: { link: '', bank: 'Bank: Example Bank\nAccount: 0123456789\nName: Waapo' } }, { id: 2, name: 'Monthly', price: '₦5,000', days: 30, payable: true, manual: { link: '', bank: 'Bank: Example Bank\nAccount: 0123456789\nName: Waapo' } }] });
+  if (key === 'POST /api/pay') { if (!body.email) return Promise.reject(new Error('Enter a valid email address for the receipt.')); return r({ url: 'https://example.com/pay' }); }
+  if (key === 'GET /api/insights') return r({ hours: [0, 0, 0, 0, 0, 1, 2, 4, 7, 6, 5, 5, 6, 5, 4, 5, 6, 8, 11, 17, 21, 15, 7, 2], views7: 312, viewers7: 188, posts7: 9, totals: { posts: 142, viewers: 604, views: 5230 }, topViewers: [{ name: 'Ada Obi', number: '234801', views: 41, last: Date.now() }, { name: '', number: '234802', views: 33, last: Date.now() }, { name: 'Chidi', number: '234803', views: 29, last: Date.now() }], bestPosts: [{ preview: 'Black Friday is here', at: Date.now(), views: 233, sent: 2500 }, { preview: 'Good night everyone 🌙', at: Date.now(), views: 190, sent: 2400 }] });
+  if (key === 'GET /api/links/chat') { const all = D.chatLinks ||= Array.from({ length: 47 }, (_, i) => ({ code: 'Abc' + String(i).padStart(2, '0') + 'xyzXYZ1234567', url: 'https://chat.whatsapp.com/Abc' + String(i).padStart(2, '0') + 'xyzXYZ1234567', where: i % 3 ? ['Estate residents', 'Old classmates 2009', 'Weekend sales hub'][i % 3] : 'A private chat', at: Date.now() - i * 5 * 36e5 })), s = (q.get('q') || '').toLowerCase(), f = all.filter(x => !s || x.url.toLowerCase().includes(s) || x.where.toLowerCase().includes(s)), pages = Math.max(1, Math.ceil(f.length / 20)), page = Math.min(Number(q.get('page')) || 1, pages); return r({ total: f.length, page, pages, items: f.slice((page - 1) * 20, page * 20) }); }
+  if (key === 'POST /api/links/info') return r({ subject: 'Lagos Business Owners', size: 842, desc: 'Share offers, ask questions, no spam please.', joined: false });
+  if (key === 'POST /api/links/join' || key === 'POST /api/links/export' || key === 'POST /api/links/check' || key === 'POST /api/contacts/export') return r({ ok: true, total: 47, started: true });
+  if (key === 'POST /api/contacts/dedupe') return r({ merged: 6, removed: 2 });
+  if (key === 'GET /api/links/dead') return r({ total: 2, checking: false, items: [{ code: 'DeadA1234567890abcde', url: 'https://chat.whatsapp.com/DeadA1234567890abcde', where: 'Old classmates 2009', at: Date.now() - 2 * 864e5 }, { code: 'DeadB1234567890abcde', url: 'https://chat.whatsapp.com/DeadB1234567890abcde', where: '', at: Date.now() - 5 * 864e5 }] });
+  if (key === 'POST /api/links/dead/delete') return r({ ok: true });
+  if (key === 'GET /api/admin/users') return r({ total: 3, users: [{ id: '5919404662', name: 'Ruthy', linked: true, up: true, status: 'active' }, { id: '7012345678', name: 'Tunde', linked: true, up: false, status: 'expired' }, { id: '6098765432', name: '', linked: false, up: false, status: 'paused' }] });
+  if (/^GET \/api\/admin\/users\/\d+$/.test(key)) return r({ id: path.split('/').pop(), name: 'Ruthy', username: 'xretylaw', linked: true, up: true, status: 'active', limit: 10, today: 1, expires: null, plan: '', role: 'user', health: 'No problems in the last 24 hours.', can: { pause: true, resume: true, limit: true, days: true, repair: true, unlink: true, remove: true } });
+  if (/^POST \/api\/admin\/users\//.test(key)) return r({ ok: true });
+  if (key === 'GET /api/admin/payments') return r({ pending: (D.pay ||= [{ uid: '7012345678', at: Date.now() - 3 * 36e5, plan: 'Monthly', price: '₦3,000', days: 30 }, { uid: '6098765432', at: Date.now() - 20 * 36e5, plan: '', price: '', days: null }]) });
+  if (key === 'POST /api/admin/payments/decide') { D.pay = D.pay.filter(x => x.uid !== body.uid); return r({ ok: true }); }
+  if (key === 'GET /api/contacts') return r({ total: 4210, phonebook: 2180, chats: 1320, viewers: 410, groupOnly: 300, multi: 940, removed: 12 });
+  if (key === 'GET /api/contacts/views') return r({ total: 3, people: [['2348011112222', 'Ada', 42], ['2348033334444', 'Tunde', 31], ['2347055556666', '', 12]].map(([number, name, views]) => ({ number, name, views, last: Date.now() - views * 36e5, post: 'Good morning everyone' })) });
+  if (key === 'GET /api/contacts/posts') return r({ posts: [{ id: 1, at: Date.now() - 5 * 36e5, preview: 'Black Friday is here', views: 311 }, { id: 2, at: Date.now() - 30 * 36e5, preview: 'Good morning everyone', views: 402 }] });
+  if (/^GET \/api\/contacts\/posts\//.test(key)) return r({ preview: 'Black Friday is here', at: Date.now() - 5 * 36e5, total: 2, viewers: [{ number: '2348011112222', name: 'Ada' }, { number: '2348033334444', name: '' }] });
+  if (key === 'GET /api/contacts/inactive') return r({ ok: true, total: 2, list: [{ number: '2348090001111', name: 'Chidi', views: 0, last: 0 }, { number: '2348090002222', name: '', views: 1, last: Date.now() - 200 * 864e5 }] });
+  if (key === 'POST /api/contacts/prune') return r({ ok: true, removed: 2 });
+  if (key === 'GET /api/reach') return r({ on: D.reachOn ?? false, perDay: D.perDay || 5, max: 10, today: 2, total: 48, replies: 9, minDays: 60, viewed: 14, optOut: 1, msgs: D.rmsgs || ['Hi {name} 👋 hope you are doing well! Just checking in. How have you been?'], custom: !!D.rmsgs, can: { toggle: true, msgs: true, per: true } });
+  if (key === 'POST /api/reach/toggle') { D.reachOn = !!body.on; return r({ ok: true }); }
+  if (key === 'POST /api/reach/settings') { if (body.perDay) D.perDay = body.perDay; if (body.msgs) D.rmsgs = body.msgs.length ? body.msgs : null; return r({ ok: true }); }
+  if (key === 'POST /api/queue') return r({ scheduled: body.items.length, first: body.at, last: body.at + (body.items.length - 1) * body.gap * 36e5 });
+  if (key === 'GET /api/colours') return r({ colors: D.cols ||= [{ name: 'Sunset', hex: '#FF5722' }, { name: 'Ocean', hex: '#0288D1' }] });
+  if (key === 'POST /api/colours') { D.cols = [...(D.cols || []).filter(c => c.name !== body.name), { name: body.name, hex: body.hex.toUpperCase() }]; return r({ ok: true }); }
+  if (key === 'POST /api/colours/delete') { D.cols = (D.cols || []).filter(c => c.name !== body.name); return r({ ok: true }); }
+  if (key === 'GET /api/templates') return r({ templates: (D.tpls ||= [{ name: 'Good morning', type: 'text', preview: 'Good morning everyone, have a blessed day', bg: '#128C7E' }, { name: 'Promo photo', type: 'image', preview: 'New stock is in', bg: null }]).map((t, i) => ({ ...t, i })) });
+  if (key === 'POST /api/templates/use') return r(body.when === 'later' ? { scheduled: true, at: body.at } : { started: true });
+  if (key === 'POST /api/templates/delete') { D.tpls.splice(body.index, 1); return r({ ok: true }); }
+  if (key === 'GET /api/history') return r({ posts: (D.hist ||= [{ id: 1, at: Date.now() - 3 * 36e5, preview: 'Black Friday is here', people: 1180 }, { id: 2, at: Date.now() - 9 * 36e5, preview: 'Good morning everyone', people: 1204 }]) });
+  if (key === 'POST /api/history/delete') { D.hist = D.hist.filter(h => String(h.id) !== String(body.id)); return r({ started: true }); }
+  if (key === 'GET /api/inbox') return r({ canMessage: true, notices: [{ text: 'Server maintenance tonight at 11pm. Scheduled posts still go out.', at: Date.now() - 20 * 36e5 }], mine: (D.mine ||= []).slice() });
+  if (key === 'POST /api/inbox/message') { D.mine = [{ text: body.text, at: Date.now(), replied: false }, ...(D.mine || [])]; return r({ ok: true, notified: true }); }
+  if (key === 'GET /api/referral') return r({ active: true, days: 7, link: 'https://t.me/waapo_bot?start=ref_abc12', joined: 4, paid: 2, earned: 14 });
+  if (key === 'GET /api/groups/all') return r({ total: 6, groups: [['Church choir', 84, 1, 0], ['Estate residents', 212, 0, 0], ['Old classmates 2009', 57, 0, 1], ['Weekend sales hub', 130, 1, 0], ['Family', 18, 0, 0], ['', 9, 0, 1]].map((g, i) => ({ id: 'g' + i, name: g[0], size: g[1], admin: !!g[2], quiet: !!g[3], link: g[2] ? 'https://chat.whatsapp.com/Abc' + i : '' })) });
+  if (key === 'POST /api/groups/refresh') return r({ ok: true, total: 6 });
+  if (key === 'GET /api/exclusions' || key === 'POST /api/exclusions') { D.excl ||= ['2348011112222', '2348033334444']; if (method === 'POST') { const n = String(body.numbers).split(/\D+/).filter(x => x.length > 6); D.excl = body.action === 'remove' ? D.excl.filter(x => !n.includes(x)) : [...new Set([...D.excl, ...n])]; } return r({ numbers: D.excl }); }
+  if (key === 'GET /api/account') return r({ wa: { linked: true, up: true, number: '2348012345678' }, alerts: true, weekly: true, autoPrune: false, can: { alerts: true, weekly: true, prune: true, repair: true }, health: [{ t: Date.now() - 36e5, kind: 'groups synced', detail: '501 groups' }, { t: Date.now() - 5 * 36e5, kind: 'reconnect', detail: 'code 515' }], code: null });
+  return r({});
+}
+
+async function pollHist() {
+  if (document.hidden || S.tab !== 'more' || S.view.more !== 'hist' || !S.hist.some(h => h.removing)) return;
+  try { await loadHist(); $('#main').innerHTML = histHTML(); } catch (x) {}
+}
+async function pollAcct() {                            // while linking: show the code and the Connected state as soon as they happen
+  if (document.hidden || S.tab !== 'more' || S.view.more !== 'account' || !S.acct) return;
+  const o = S.acct; try { await loadAccount(); if (o.code !== S.acct.code || o.wa.up !== S.acct.wa.up || o.wa.linked !== S.acct.wa.linked) $('#main').innerHTML = accountHTML(); } catch (x) {}
+}
+const shrink = f => new Promise((ok, bad) => {                  // phone photos are huge: scale to 1600 px, plenty for a status and quick to upload
+  const img = new Image(), u = URL.createObjectURL(f);
+  img.onload = () => { const k = Math.min(1, 1600 / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); c.toBlob(b => b ? ok(b) : bad(new Error('Could not read that photo.')), 'image/jpeg', .85); URL.revokeObjectURL(u); };
+  img.onerror = () => bad(new Error('Use a JPG or PNG photo.')); img.src = u;
+});
+async function upload(type, blob) {
+  if (DEMO) return { token: 'demo' };
+  let r; try { r = await fetch(API + '/api/upload?type=' + type, { method: 'POST', headers: { Authorization: 'tma ' + (tg ? tg.initData : ''), 'Content-Type': 'application/octet-stream' }, body: blob }); } catch (x) { throw new Error('Cannot reach the server. Check your connection.'); }
+  const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.error || 'Upload failed. Try again.'); return j;
+}
+function renderMedia() {
+  const m = S.media, el = $('#mprev'), go = $('#mgo'); if (!el) return;
+  el.innerHTML = !m ? '' : m.status === 'uploading' ? '<div class="empty"><b>Uploading…</b>Keep this screen open.</div>'
+    : m.type === 'image' ? `<img src="${m.url}" alt="Your photo" style="max-width:100%;max-height:300px;border-radius:12px">` : m.type === 'video' ? `<video src="${m.url}" controls playsinline style="max-width:100%;max-height:300px;border-radius:12px"></video>` : `<audio src="${m.url}" controls style="width:100%"></audio>`;
+  if (go) go.disabled = !(m && m.status === 'ready') || (S.when === 'later' && !$('#at').value);
+}
+document.addEventListener('change', async e => {
+  if (e.target.id === 'qat') { S.qat = e.target.value; return; }
+  if (e.target.id === 'qgap') { S.qgap = Number(e.target.value); return; }
+  if (e.target.id === 'qfiles') {
+    const files = [...e.target.files]; e.target.value = '';
+    for (const f of files) {
+      if (S.q.length >= 50) { toast('The queue limit is 50 files.', true); break; }
+      const type = /^image\//.test(f.type) ? 'image' : f.type === 'video/mp4' ? 'video' : /^audio\/(mpeg|ogg)$/.test(f.type) || /\.(mp3|ogg)$/i.test(f.name) ? 'audio' : null;
+      if (!type) { toast(`Skipped ${f.name}: use JPG, PNG, MP4, MP3 or OGG.`, true); continue; }
+      const it = { type, status: 'uploading', caption: '' }; S.q.push(it); $('#main').innerHTML = queueHTML();
+      try { const blob = type === 'image' ? await shrink(f) : f, r = await upload(type, blob); it.token = r.token; it.url = type === 'image' ? URL.createObjectURL(blob) : ''; it.status = 'ready'; }
+      catch (x) { S.q.splice(S.q.indexOf(it), 1); toast(x.message, true); }
+      if (S.tab === 'more' && S.view.more === 'queue') $('#main').innerHTML = queueHTML();
+    } return;
+  }
+  if (e.target.id === 'at') return renderMedia();
+  if (e.target.id !== 'mfile') return; const f = e.target.files[0]; if (!f) return; const type = S.ptype;
+  S.media = { type, status: 'uploading' }; renderMedia();
+  try { const blob = type === 'image' ? await shrink(f) : f, r = await upload(type, blob); S.media = { type, token: r.token, url: URL.createObjectURL(blob), status: 'ready' }; }
+  catch (x) { S.media = null; e.target.value = ''; toast(x.message, true); } renderMedia();
+});
+document.addEventListener('input', e => { if (e.target.id === 'lq') { S.lq = e.target.value; clearTimeout(S.lt); S.lt = setTimeout(async () => { try { S.lpage = 1; S.lopen = null; S.linfo = null; await loadLinks(); const bd = $('#lbody'); if (bd) bd.innerHTML = lbodyHTML(); } catch (x) {} }, 300); } if (e.target.id === 'auq' && S.au) { S.aq = e.target.value; const q = S.aq.trim().toLowerCase(), all = S.au.users.filter(u => !q || u.id.includes(q) || (u.name || '').toLowerCase().includes(q)); $('#aulist').innerHTML = aulistHTML(all.slice(0, 60), all.length); } if (e.target.dataset && e.target.dataset.qcap !== undefined && S.q[e.target.dataset.qcap]) S.q[e.target.dataset.qcap].caption = e.target.value; if (e.target.id === 'ggq' && S.allg) { S.gq = e.target.value; $('#glist').innerHTML = glistHTML(); } });
+/* ---------- start ---------- */
+async function start() {
+  const main = $('#main');
+  if (!DEMO && !(tg && tg.initData)) { main.innerHTML = '<div class="full"><h1>Open Waapo from Telegram</h1><p>This page works inside the bot. Open the bot and tap <b>Open app</b>.</p></div>'; return; }
+  if (!DEMO && (!API || API.includes('YOUR-SERVER'))) { main.innerHTML = '<div class="full"><h1>Almost ready</h1><p>The server address is not set. Edit <b>config.js</b> and set <b>WAAPO_API</b>.</p></div>'; return; }
+  let err = null;
+  for (let n = 0; n < 14; n++) {                       // a sleeping server can take about a minute to wake up
+    try { await loadMe(); err = null; break; } catch (e) {
+      err = e; if (!/^Cannot reach/.test(e.message)) break;
+      main.innerHTML = '<div class="full"><h1>Waking the server…</h1><p>This can take up to a minute the first time.</p></div>';
+      await new Promise(r => setTimeout(r, 5000));
+    }
+  }
+  if (err) { main.innerHTML = `<div class="full"><h1>Can’t open the app</h1><p>${esc(err.message)}</p><button class="btn quiet" onclick="location.reload()">Try again</button></div>`; return; }
+  await show('home');
+  setInterval(refresh, 30000); document.addEventListener('visibilitychange', refresh);
+  setInterval(() => { if (S.tab === 'sending') refresh(); pollAcct(); pollHist(); }, 4000);
+}
+start();
+})();
+</script>
+</body>
+</html>
